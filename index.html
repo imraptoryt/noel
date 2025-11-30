@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Terminal — Opération : Base Oubliée</title>
+  <style>
+    :root{--bg:#040404;--panel:#071012;--green:#32ff7e;--muted:#7b8b8f}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', monospace;background:linear-gradient(180deg,#000 0%,#020617 100%);color:var(--green)}
+    .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .terminal{width:900px;max-width:96vw;background:linear-gradient(180deg,#021 0%,#04182a 100%);border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.8);overflow:hidden;border:1px solid rgba(50,255,126,.06)}
+    .header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(0,0,0,.25)}
+    .dots{display:flex;gap:8px}
+    .dot{width:12px;height:12px;border-radius:50%}
+    .d1{background:#ff5f56}.d2{background:#ffbd2e}.d3{background:#27c93f}
+    .body{display:flex;gap:20px;padding:18px}
+    .screen{flex:1;min-height:420px;background:rgba(0,0,0,.25);padding:18px;border-radius:8px;overflow:auto}
+    .side{width:300px;max-width:35%;display:flex;flex-direction:column;gap:12px}
+    .card{background:rgba(0,0,0,.15);padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,.03)}
+    pre{margin:0;white-space:pre-wrap;word-break:break-word}
+
+    /* loading */
+    .loader{font-size:14px;line-height:1.4;color:var(--muted)}
+    .progress{height:10px;background:rgba(255,255,255,.04);border-radius:6px;margin-top:10px;overflow:hidden}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,rgba(50,255,126,.15),var(--green));transition:width .3s}
+
+    /* dialog */
+    .dialog{margin-top:12px}
+    .narration{background:rgba(0,0,0,.35);padding:12px;border-radius:6px;color:var(--green);font-size:14px}
+    .choices{display:flex;gap:10px;margin-top:10px}
+    .btn{background:transparent;border:1px solid rgba(50,255,126,.12);padding:8px 10px;border-radius:6px;color:var(--green);cursor:pointer}
+    .btn:hover{border-color:rgba(50,255,126,.3);transform:translateY(-1px)}
+    .btn.primary{background:rgba(50,255,126,.06)}
+
+    /* stage selector */
+    select,input[type=button]{background:transparent;border:1px solid rgba(255,255,255,.04);padding:8px;border-radius:6px;color:var(--green);width:100%}
+    .hint{white-space:pre-wrap;margin-top:10px;background:rgba(0,0,0,.25);padding:12px;border-radius:6px;border:1px dashed rgba(50,255,126,.08);color:var(--green)}
+
+    footer{padding:12px 18px;color:var(--muted);font-size:13px}
+
+    @media (max-width:800px){
+      .body{flex-direction:column}
+      .side{width:100%;max-width:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="terminal" role="application" aria-label="Interface terminal interactive">
+      <div class="header">
+        <div class="dots"><div class="dot d1"></div><div class="dot d2"></div><div class="dot d3"></div></div>
+        <div style="flex:1;color:var(--muted);font-size:13px">BASE-ARCHIVE // Accès local</div>
+        <div style="color:var(--muted);font-size:12px">Session: invité</div>
+      </div>
+
+      <div class="body">
+        <div class="screen card" id="screen" aria-live="polite">
+          <pre id="terminalText">connect: attempting local handshake...
+</pre>
+
+          <div class="loader" id="loaderArea">
+            <div>Injection de payload — initialisation</div>
+            <div class="progress" aria-hidden="true"><div class="bar" id="progressBar"></div></div>
+            <div id="gibber">...</div>
+          </div>
+
+          <div class="dialog" id="dialogArea" style="display:none">
+            <div class="narration" id="narrationText">Salut mon ami, je suis là pour t’aider à entrer dans cette vieille base de recherche. Pour commencer, je sais que ces scientifiques gardaient toujours un moyen d’accès basé sur des jeux de logique. Tu seras donc confronté à différents puzzles afin, au final, de pouvoir récupérer le cristal qui se trouve dans le coffre-fort de la salle de commandement.
+
+Mais ce n’est pas tout : je suis là pour te donner des indices si jamais tu ne réussis pas une étape. Il te suffira simplement de choisir l’étape où tu es bloqué, et je t’aiderai.</div>
+
+            <div class="choices" role="group" aria-label="Choix d'assistance">
+              <button class="btn primary" id="yesBtn">Oui — je veux de l'aide</button>
+              <button class="btn" id="noBtn">Non — je n'ai pas besoin</button>
+            </div>
+
+            <div id="afterYes" style="display:none;margin-top:12px">
+              <div class="card">
+                <label for="stageSelect">Choisis l'étape où tu es bloqué :</label>
+                <select id="stageSelect" aria-label="Sélection de l'étape">
+                  <option value="">-- Choisir une étape --</option>
+                </select>
+                <div style="display:flex;gap:8px;margin-top:8px">
+                  <input type="button" id="getHint" value="Obtenir l'indice" />
+                  <input type="button" id="revealAll" value="Révéler tous les indices" />
+                </div>
+                <div class="hint" id="hintBox" style="display:none"></div>
+              </div>
+            </div>
+
+            <div id="afterNo" style="display:none;margin-top:12px">
+              <div class="card">Très bien. Si tu changes d'avis, clique sur "Oui — je veux de l'aide".</div>
+            </div>
+
+          </div>
+        </div>
+
+        <aside class="side">
+          <div class="card">
+            <strong>Statut :</strong>
+            <div id="status">Injection en cours</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:8px">Progrès, logs et réponses apparaîtront ici.</div>
+          </div>
+
+          <div class="card">
+            <strong>Commandes rapides</strong>
+            <div style="display:flex;gap:8px;margin-top:8px"><button class="btn" id="skip">Forcer fin</button><button class="btn" id="restart">Reset</button></div>
+          </div>
+
+          <div class="card">
+            <strong>Aide</strong>
+            <div style="font-size:13px;color:var(--muted);margin-top:8px">Choisis "Oui" pour obtenir un indice ou sélectionne une étape particulière. 12 étapes disponibles.</div>
+          </div>
+        </aside>
+      </div>
+
+      <footer>
+        Polaris-7 • Terminal • Base Archivée
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    // --- données des indices (12 étapes)
+    const hints = [
+      "Étape 1  Entrée principale : Observe la séquence les chiffres d'un coter: 2-4-1-3 c'est l'ordre , ensuite remet les chiffres enface dans l'ordre",
+      "Étape 2  Mot de passe bio : Les scientifiques utilisaient souvent le nom d'un ancien campus + l'année d'inauguration (4 chiffres). Pense aux indices affichés sur la plaque près du hall.",
+      "Étape 3  Puzzle lumineux : Aligne les tuiles pour que la lumière traverse sans interruption. Commence par la tuile qui réfléchit le faisceau.",
+      "Étape 4  Cadenas à symboles : Les symboles forment une phrase si lus en sens horaire. Lis-les comme des directions (N,E,S,W) puis applique sur la grille.",
+      "Étape 5  Matrice binaire : Remplace chaque LED allumée par 1 et la LED éteinte par 0, groupe par 8, convertis en ASCII.",
+      "Étape 6  Labyrinthe holographique : Suit le son le plus aigu — il marque le bon couloir. Utilise les échos pour vérifier ton chemin.",
+      "Étape 7  Serrure chimique : Les réactifs ont des couleurs — mélange 2 parts du bleu électrique et 1 part du jaune ancien pour obtenir la réaction verte qui active le capteur.",
+      "Étape 8  Jeu de mémoire : Une séquence de couleurs défile. Répète-la en commençant par la couleur moyenne (ni la plus claire ni la plus foncée).",
+      "Étape 9  Cryptogramme : Chaque mot a une lettre manquante. Remplace la lettre absente par la position du mot dans la phrase pour révéler le message.",
+      "Étape 10  Fréquence radio : Accorde la fréquence au channel marqué 101.7 puis écoute le signal en morse — les pauses longues sont des tirets.",
+      "Étape 11  Calculateur ancien : Utilise la table fournie : (A×3 + B×2) mod 97 = code final. Trouve A et B dans les index indiqués sur la dalle.",
+      "Étape 12  Coffre-fort final : Le cristal est protégé par une combinaison en 4 étapes : (1) ordre des symboles, (2) somme des LED, (3) mot de passe bio, (4) rotation 90° du cadran. Vérifie chaque sous-étape l'une après l'autre."
+    ];
+
+    // --- éléments DOM
+    const terminalText = document.getElementById('terminalText');
+    const progressBar = document.getElementById('progressBar');
+    const gibber = document.getElementById('gibber');
+    const loaderArea = document.getElementById('loaderArea');
+    const dialogArea = document.getElementById('dialogArea');
+    const narrationText = document.getElementById('narrationText');
+    const yesBtn = document.getElementById('yesBtn');
+    const noBtn = document.getElementById('noBtn');
+    const afterYes = document.getElementById('afterYes');
+    const afterNo = document.getElementById('afterNo');
+    const stageSelect = document.getElementById('stageSelect');
+    const getHint = document.getElementById('getHint');
+    const revealAll = document.getElementById('revealAll');
+    const hintBox = document.getElementById('hintBox');
+    const status = document.getElementById('status');
+    const skip = document.getElementById('skip');
+    const restart = document.getElementById('restart');
+
+    // populate stages
+    for(let i=1;i<=12;i++){
+      const opt = document.createElement('option');
+      opt.value = i-1; // index
+      opt.textContent = `Étape ${i}`;
+      stageSelect.appendChild(opt);
+    }
+
+    // --- simulate "hack" loading animation
+    let progress = 0;
+    const gibberishWords = ["xor","0x9f","∆","#AUTH",">_","packets","sync","probe","handshake","/dev/tty","entropy","r00t","segv","mem" ];
+    const gi = setInterval(()=>{
+      progress = Math.min(100, progress + Math.floor(Math.random()*12)+4);
+      progressBar.style.width = progress + '%';
+      gibber.textContent = gibberishWords[Math.floor(Math.random()*gibberishWords.length)] + ' ' + Math.random().toString(36).slice(2,10);
+      terminalText.textContent += '.';
+      if(progress>=100){
+        clearInterval(gi);
+        setTimeout(()=>{
+          loaderArea.style.display='none';
+          dialogArea.style.display='block';
+          status.textContent = 'Connexion établie — assistant actif';
+          terminalText.textContent += '\n>> accès root obtenu.\n';
+        },600);
+      }
+    },420);
+
+    // skip or force end
+    skip.addEventListener('click',()=>{
+      progress=100; progressBar.style.width='100%'; loaderArea.style.display='none'; dialogArea.style.display='block'; status.textContent='Connexion forcée — assistant actif'; terminalText.textContent += '\n>> accès root (forcé).\n';
+    })
+
+    restart.addEventListener('click',()=>{
+      location.reload();
+    })
+
+    // choices
+    yesBtn.addEventListener('click',()=>{
+      afterYes.style.display='block';
+      afterNo.style.display='none';
+      hintBox.style.display='none';
+      terminalText.textContent += '\n[ASSISTANT] Assistance activée. Choisissez une étape pour recevoir un indice.\n';
+    });
+
+    noBtn.addEventListener('click',()=>{
+      afterNo.style.display='block';
+      afterYes.style.display='none';
+      hintBox.style.display='none';
+      terminalText.textContent += '\n[ASSISTANT] Assistance refusée. Bonne chance.\n';
+    });
+
+    getHint.addEventListener('click',()=>{
+      const v = stageSelect.value;
+      if(v === ''){
+        hintBox.style.display='block';
+        hintBox.textContent = 'Sélectionnez d\u00e9j\u00e0 une \u00e9tape (1–12).';
+        return;
+      }
+      hintBox.style.display='block';
+      hintBox.textContent = hints[Number(v)];
+      terminalText.textContent += `\n[ASSISTANT] Indice pour l\'Étape ${Number(v)+1}: ${hints[Number(v)]}\n`;
+    });
+
+    revealAll.addEventListener('click',()=>{
+      hintBox.style.display='block';
+      hintBox.textContent = hints.map((h,i)=>`Étape ${i+1} — ${h}`).join('\n\n');
+      terminalText.textContent += '\n[ASSISTANT] Tous les indices révélés.\n';
+    });
+
+    // allow Enter to get hint
+    stageSelect.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ getHint.click(); }});
+
+    // accessibility: focus first button after loading
+    setTimeout(()=>{ yesBtn.focus(); },1600);
+
+  </script>
+</body>
+</html>
