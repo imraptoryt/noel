@@ -2,289 +2,1064 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>DARKNET TERMINAL v3.7</title>
+<title>FLEECA BANK - Mobile</title>
 <style>
-  * { box-sizing: border-box; }
-  html, body {
-    margin: 0; padding: 0;
-    background: #000;
-    color: #00ff41;
-    font-family: 'Courier New', Courier, monospace;
-    height: 100%;
-    overflow: hidden;
-  }
-  #matrix-bg {
-    position: fixed; top:0; left:0;
-    width:100%; height:100%;
-    z-index:1; opacity:0.12;
-    pointer-events:none;
-  }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%;
+  background: #0a0e14;
+  font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: #fff;
+  overflow: hidden;
+  user-select: none;
+}
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, #0d1117 0%, #050709 80%);
+}
 
-  /* ========== INTRO : MINI-JEU SAHP ========== */
-  #intro-screen {
-    position: fixed;
-    inset: 0;
-    z-index: 10;
-    background: radial-gradient(ellipse at center, #0a1929 0%, #050b14 70%, #02050a 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #cbd5e1;
-    font-family: 'Courier New', monospace;
-    transition: opacity 0.6s;
-  }
-  #intro-screen.hide { opacity: 0; pointer-events: none; }
-  .sahp-panel {
-    width: min(680px, 94vw);
-    background: #0a1929;
-    border: 2px solid #00d0ff;
-    border-radius: 8px;
-    padding: 22px 26px;
-    box-shadow: 0 0 30px rgba(0,208,255,0.35), inset 0 0 30px rgba(0,208,255,0.05);
-    position: relative;
-  }
-  .sahp-panel::before, .sahp-panel::after {
-    content:''; position:absolute; left:0; right:0; height:6px;
-    background: repeating-linear-gradient(45deg, #fbbf24 0 8px, #0a1929 8px 16px);
-  }
-  .sahp-panel::before { top:-2px; border-radius: 6px 6px 0 0; }
-  .sahp-panel::after { bottom:-2px; border-radius: 0 0 6px 6px; }
-  .sahp-title {
-    text-align: center;
-    color: #00d0ff;
-    font-size: 22px;
-    font-weight: bold;
-    letter-spacing: 4px;
-    text-shadow: 0 0 12px #00d0ff;
-    margin: 8px 0 4px;
-  }
-  .sahp-subtitle {
-    text-align: center;
-    color: #94a3b8;
-    font-size: 11px;
-    letter-spacing: 3px;
-    margin-bottom: 18px;
-  }
-  .sahp-timer-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 11px;
-    letter-spacing: 2px;
-    color: #94a3b8;
-    margin-bottom: 4px;
-  }
-  .sahp-timer-bar {
-    height: 3px;
-    background: #1e293b;
-    border-radius: 2px;
-    overflow: hidden;
-    margin-bottom: 18px;
-  }
-  .sahp-timer-fill {
-    height: 100%;
-    width: 100%;
-    background: linear-gradient(90deg, #00d0ff, #38bdf8);
-    box-shadow: 0 0 8px #00d0ff;
-    transition: width 0.1s linear;
-  }
-  .sahp-target {
-    background: #0f1f33;
-    border: 1px solid #1e3a5f;
-    border-radius: 6px;
-    padding: 14px 18px;
-    margin-bottom: 16px;
-  }
-  .sahp-target-label {
-    text-align: center;
-    color: #94a3b8;
-    font-size: 10px;
-    letter-spacing: 4px;
-    margin-bottom: 10px;
-  }
-  .sahp-target-cells {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .sahp-target-cell {
-    width: 60px;
-    padding: 10px 0;
-    text-align: center;
-    background: #0a1929;
-    border: 1px solid #1e3a5f;
-    border-radius: 4px;
-    font-size: 16px;
-    letter-spacing: 1px;
-    color: #cbd5e1;
-    font-weight: bold;
-    transition: all 0.2s;
-  }
-  .sahp-target-cell.active {
-    border-color: #00d0ff;
-    background: #0c2540;
-    box-shadow: 0 0 10px rgba(0,208,255,0.6), inset 0 0 8px rgba(0,208,255,0.2);
-    color: #00d0ff;
-    text-shadow: 0 0 8px #00d0ff;
-  }
-  .sahp-target-cell.done {
-    border-color: #16a34a;
-    background: #052e1a;
-    color: #16a34a;
-  }
-  .sahp-arrow { color: #475569; font-size: 16px; }
-  .sahp-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
-  }
-  .sahp-cell {
-    background: #0f1f33;
-    border: 1px solid #1e3a5f;
-    border-radius: 4px;
-    padding: 14px 0;
-    text-align: center;
-    font-size: 17px;
-    font-weight: bold;
-    letter-spacing: 1px;
-    color: #cbd5e1;
-    cursor: pointer;
-    transition: all 0.15s;
-    user-select: none;
-  }
-  .sahp-cell:hover {
-    background: #1a3050;
-    border-color: #00d0ff;
-    color: #00d0ff;
-    transform: translateY(-1px);
-  }
-  .sahp-cell.found {
-    background: #052e1a;
-    border-color: #16a34a;
-    color: #16a34a;
-    cursor: default;
-    pointer-events: none;
-  }
-  .sahp-cell.wrong { animation: shakeRed 0.4s; }
-  .sahp-status {
-    text-align: center;
-    margin-top: 14px;
-    font-size: 12px;
-    letter-spacing: 2px;
-    color: #94a3b8;
-    min-height: 18px;
-  }
-  .sahp-status.fail { color: #ef4444; text-shadow: 0 0 8px #ef4444; }
-  .sahp-status.win  { color: #16a34a; text-shadow: 0 0 8px #16a34a; }
-  @keyframes shakeRed {
-    0%,100% { background:#0f1f33; border-color:#1e3a5f; color:#cbd5e1; transform:translateX(0);}
-    25%     { background:#3b0a0a; border-color:#ef4444; color:#ef4444; transform:translateX(-4px);}
-    75%     { background:#3b0a0a; border-color:#ef4444; color:#ef4444; transform:translateX(4px);}
-  }
+/* ============= PHONE FRAME ============= */
+#phone {
+  width: 380px;
+  height: 760px;
+  background: #111;
+  border-radius: 44px;
+  padding: 12px;
+  box-shadow: 0 0 60px rgba(0,255,80,0.08), 0 0 0 2px #1a1a1a, inset 0 0 0 1px #2a2a2a;
+  position: relative;
+  z-index: 5;
+}
+#phone-screen {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  border-radius: 34px;
+  overflow: hidden;
+  position: relative;
+}
+.notch {
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 130px; height: 22px;
+  background: #111;
+  border-radius: 0 0 18px 18px;
+  z-index: 100;
+}
+.status-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 30px;
+  padding: 6px 22px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  z-index: 50;
+}
+.status-bar .right { display: flex; gap: 6px; font-size: 12px; }
 
-  /* ========== TERMINAL ========== */
-  #terminal {
-    position: relative;
-    z-index: 2;
-    padding: 18px;
-    height: 100vh;
-    overflow-y: auto;
-    text-shadow: 0 0 5px #00ff41;
-    font-size: 15px;
-    line-height: 1.35;
-  }
-  .line { margin: 1px 0; white-space: pre-wrap; word-wrap: break-word; }
-  .error   { color:#ff2640; text-shadow:0 0 5px #ff2640; }
-  .warning { color:#ffaa00; text-shadow:0 0 5px #ffaa00; }
-  .success { color:#00ff41; }
-  .info    { color:#00d0ff; text-shadow:0 0 5px #00d0ff; }
-  .dim     { opacity:0.45; }
-  .big     { font-size:18px; font-weight:bold; }
-  .glitch { animation: glitch 0.25s steps(2) infinite; display:inline-block; }
-  @keyframes glitch {
-    0%   { transform: translate(0,0);   text-shadow:0 0 4px #00ff41; }
-    25%  { transform: translate(-2px,1px); text-shadow:2px 0 #ff00ff,-2px 0 #00ffff; }
-    50%  { transform: translate(2px,-1px); text-shadow:-2px 0 #ff00ff,2px 0 #00ffff; }
-    75%  { transform: translate(-1px,-2px); }
-    100% { transform: translate(0,0); }
-  }
-  #input-line { display:flex; align-items:center; padding: 4px 0; }
-  #prompt { margin-right:8px; color:#00ff41; white-space: nowrap; }
-  #cmd-input {
-    background: transparent; border: none;
-    color: #00ff41;
-    font-family: 'Courier New', monospace;
-    font-size: 15px;
-    flex: 1; outline: none;
-    text-shadow:0 0 5px #00ff41;
-    caret-color: #00ff41;
-  }
-  .ascii-art {
-    color:#00ff41; font-size: 10px; line-height: 11px;
-    margin: 4px 0; white-space: pre;
-  }
-  .box { color:#00d0ff; text-shadow:0 0 5px #00d0ff; font-weight:bold; }
-  ::-webkit-scrollbar { width: 8px; }
-  ::-webkit-scrollbar-track { background:#001a05; }
-  ::-webkit-scrollbar-thumb { background:#00ff41; }
+.screen {
+  position: absolute;
+  inset: 0;
+  padding-top: 36px;
+  display: none;
+  flex-direction: column;
+}
+.screen.active { display: flex; }
+
+/* ============= HOME SCREEN ============= */
+#home-screen {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(16,185,129,0.12), transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(59,130,246,0.10), transparent 50%),
+    linear-gradient(180deg, #1a2332 0%, #0a0e14 100%);
+}
+.home-time {
+  text-align: center;
+  font-size: 64px;
+  font-weight: 200;
+  letter-spacing: -2px;
+  margin-top: 18px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+}
+.home-date {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: #cbd5e1;
+  margin-top: -4px;
+  margin-bottom: 22px;
+}
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px 0;
+  padding: 0 18px;
+}
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.app:active { transform: scale(0.9); }
+.app-icon {
+  width: 56px; height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+.app-name {
+  font-size: 11px;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+/* app colors */
+.bg-blue   { background: linear-gradient(135deg, #2563eb, #1e40af); }
+.bg-green  { background: linear-gradient(135deg, #10b981, #047857); }
+.bg-purple { background: linear-gradient(135deg, #a855f7, #6d28d9); }
+.bg-pink   { background: linear-gradient(135deg, #ec4899, #be185d); }
+.bg-orange { background: linear-gradient(135deg, #f97316, #c2410c); }
+.bg-yellow { background: linear-gradient(135deg, #eab308, #a16207); }
+.bg-red    { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+.bg-gray   { background: linear-gradient(135deg, #64748b, #334155); }
+.bg-teal   { background: linear-gradient(135deg, #14b8a6, #0f766e); }
+.bg-dark   { background: linear-gradient(135deg, #1e293b, #0f172a); }
+.bg-fleeca {
+  background: linear-gradient(135deg, #16a34a, #064e2c);
+  box-shadow: 0 0 18px rgba(22,163,74,0.5), 0 4px 10px rgba(0,0,0,0.4);
+  position: relative;
+}
+.bg-fleeca::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  border: 1.5px solid rgba(34,197,94,0.6);
+  animation: fleecaPulse 2s infinite;
+}
+@keyframes fleecaPulse {
+  0%,100% { box-shadow: inset 0 0 0 1px rgba(34,197,94,0.4); }
+  50%     { box-shadow: inset 0 0 10px rgba(34,197,94,0.8); }
+}
+.dock {
+  margin-top: auto;
+  padding: 0 18px 22px;
+  display: flex;
+  justify-content: space-around;
+}
+
+/* ============= APP POPUP ============= */
+#app-popup {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+}
+#app-popup.show { display: flex; }
+.popup-box {
+  width: 80%;
+  background: #1c2330;
+  border-radius: 14px;
+  padding: 22px 18px 14px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+.popup-icon { font-size: 38px; margin-bottom: 10px; }
+.popup-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+.popup-text { font-size: 13px; color: #cbd5e1; line-height: 1.4; margin-bottom: 14px; }
+.popup-btn {
+  display: block;
+  width: 100%;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.popup-btn:hover { background: #1d4ed8; }
+
+/* ============= FLEECA LOGIN ============= */
+#fleeca-login, #fleeca-admin, #fleeca-bypass, #fleeca-success {
+  background: linear-gradient(180deg, #0a1f12 0%, #050d08 100%);
+  padding: 50px 24px 24px;
+}
+.fleeca-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+.fleeca-logo {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: #22c55e;
+  text-shadow: 0 0 14px rgba(34,197,94,0.5);
+  margin-bottom: 4px;
+}
+.fleeca-tag {
+  font-size: 10px;
+  color: #4ade80;
+  letter-spacing: 3px;
+  opacity: 0.7;
+}
+.fleeca-welcome {
+  text-align: center;
+  font-size: 13px;
+  color: #cbd5e1;
+  margin-bottom: 22px;
+}
+.fleeca-field {
+  background: #0f1f15;
+  border: 1px solid #1f3a28;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+.fleeca-field .label { font-size: 9px; letter-spacing: 2px; color: #64748b; }
+.fleeca-field .val { color: #e2e8f0; font-weight: 600; margin-top: 2px; }
+.fleeca-btn {
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.fleeca-btn.primary {
+  background: #16a34a;
+  color: #fff;
+}
+.fleeca-btn.primary:hover { background: #15803d; }
+.fleeca-btn.locked {
+  background: #1f293a;
+  color: #475569;
+  cursor: not-allowed;
+}
+.fleeca-btn.danger {
+  background: linear-gradient(135deg, #dc2626, #991b1b);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.fleeca-btn.danger::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(45deg, transparent 0 8px, rgba(255,255,255,0.06) 8px 16px);
+}
+.fleeca-btn.danger:hover { filter: brightness(1.15); }
+.fleeca-footer-warning {
+  margin-top: 14px;
+  padding: 10px;
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 8px;
+  font-size: 10px;
+  color: #fca5a5;
+  text-align: center;
+  letter-spacing: 1px;
+}
+.fleeca-back {
+  position: absolute;
+  top: 40px; left: 14px;
+  background: transparent;
+  border: none;
+  color: #4ade80;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+/* ============= FLEECA ADMIN ============= */
+.admin-banner {
+  background: linear-gradient(90deg, #dc2626, #991b1b);
+  color: #fff;
+  text-align: center;
+  padding: 8px;
+  font-size: 11px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  animation: warnBlink 1.5s infinite;
+}
+@keyframes warnBlink {
+  0%,100% { opacity: 1; }
+  50%     { opacity: 0.5; }
+}
+.admin-stat {
+  background: #0f1f15;
+  border: 1px solid #1f3a28;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+}
+.admin-stat .lbl { color: #94a3b8; }
+.admin-stat .val { color: #4ade80; font-weight: 700; }
+
+/* ============= BYPASS MINI-JEU ============= */
+#fleeca-bypass .bypass-title {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ef4444;
+  letter-spacing: 3px;
+  text-shadow: 0 0 10px rgba(239,68,68,0.5);
+  margin-bottom: 6px;
+}
+.bypass-sub {
+  text-align: center;
+  font-size: 10px;
+  color: #94a3b8;
+  letter-spacing: 2px;
+  margin-bottom: 18px;
+}
+.bypass-round-info {
+  text-align: center;
+  font-size: 12px;
+  color: #4ade80;
+  margin-bottom: 14px;
+  font-weight: 600;
+}
+.bypass-bar-container {
+  background: #0a1208;
+  border: 2px solid #1f3a28;
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 18px;
+  position: relative;
+  height: 60px;
+}
+.bypass-bar {
+  position: relative;
+  height: 100%;
+  background:
+    repeating-linear-gradient(90deg, #16201a 0 8px, #0f1812 8px 16px);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.bypass-zone {
+  position: absolute;
+  top: 0; bottom: 0;
+  background: linear-gradient(180deg, rgba(34,197,94,0.6), rgba(34,197,94,0.3));
+  border-left: 2px solid #22c55e;
+  border-right: 2px solid #22c55e;
+  box-shadow: 0 0 10px rgba(34,197,94,0.6);
+}
+.bypass-indicator {
+  position: absolute;
+  top: -4px; bottom: -4px;
+  width: 4px;
+  background: #ef4444;
+  box-shadow: 0 0 10px #ef4444, 0 0 20px rgba(239,68,68,0.5);
+  transform: translateX(-2px);
+}
+.bypass-instructions {
+  text-align: center;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.bypass-stop {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #dc2626, #991b1b);
+  border: 2px solid #ef4444;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(220,38,38,0.4);
+}
+.bypass-stop:hover { filter: brightness(1.15); }
+.bypass-stop:active { transform: scale(0.97); }
+.bypass-progress {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+.bypass-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: #1f293a;
+  border: 1px solid #334155;
+}
+.bypass-dot.done { background: #22c55e; border-color: #16a34a; box-shadow: 0 0 8px #22c55e; }
+.bypass-dot.current { background: #fbbf24; border-color: #f59e0b; animation: warnBlink 1s infinite; }
+
+/* ============= FLEECA SUCCESS ============= */
+#fleeca-success { background: linear-gradient(180deg, #052e1a 0%, #050d08 100%); }
+.vault-icon {
+  font-size: 64px;
+  text-align: center;
+  margin: 20px 0;
+  animation: vaultGlow 2s infinite;
+}
+@keyframes vaultGlow {
+  0%,100% { filter: drop-shadow(0 0 10px #22c55e); }
+  50%     { filter: drop-shadow(0 0 25px #22c55e); }
+}
+.success-title {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #22c55e;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+.success-sub {
+  text-align: center;
+  font-size: 10px;
+  color: #4ade80;
+  letter-spacing: 3px;
+  opacity: 0.8;
+  margin-bottom: 22px;
+}
+.code-box {
+  background: #0a1f12;
+  border: 2px solid #22c55e;
+  border-radius: 12px;
+  padding: 22px 14px;
+  text-align: center;
+  box-shadow: 0 0 30px rgba(34,197,94,0.3), inset 0 0 20px rgba(34,197,94,0.05);
+  margin: 0 6px;
+}
+.code-box .lbl {
+  font-size: 10px;
+  color: #94a3b8;
+  letter-spacing: 4px;
+  margin-bottom: 12px;
+}
+.code-digits {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+.code-digit {
+  width: 50px; height: 64px;
+  background: #022912;
+  border: 1.5px solid #16a34a;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  font-weight: 800;
+  color: #22c55e;
+  text-shadow: 0 0 12px #22c55e;
+  font-family: 'Courier New', monospace;
+}
+.success-time {
+  text-align: center;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 16px;
+  font-family: 'Courier New', monospace;
+}
+
+/* ============= INTRO SAHP (overlay fullscreen) ============= */
+#intro-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: radial-gradient(ellipse at center, #0a1929 0%, #050b14 70%, #02050a 100%);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Courier New', monospace;
+  transition: opacity 0.6s;
+}
+#intro-screen.show { display: flex; }
+#intro-screen.hide { opacity: 0; pointer-events: none; }
+.sahp-panel {
+  width: min(680px, 94vw);
+  background: #0a1929;
+  border: 2px solid #00d0ff;
+  border-radius: 8px;
+  padding: 22px 26px;
+  box-shadow: 0 0 30px rgba(0,208,255,0.35);
+  position: relative;
+}
+.sahp-panel::before, .sahp-panel::after {
+  content:''; position:absolute; left:0; right:0; height:6px;
+  background: repeating-linear-gradient(45deg, #fbbf24 0 8px, #0a1929 8px 16px);
+}
+.sahp-panel::before { top:-2px; border-radius: 6px 6px 0 0; }
+.sahp-panel::after { bottom:-2px; border-radius: 0 0 6px 6px; }
+.sahp-title {
+  text-align: center;
+  color: #00d0ff;
+  font-size: 22px;
+  font-weight: bold;
+  letter-spacing: 4px;
+  text-shadow: 0 0 12px #00d0ff;
+  margin: 8px 0 4px;
+}
+.sahp-subtitle {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 11px;
+  letter-spacing: 3px;
+  margin-bottom: 18px;
+}
+.sahp-timer-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 11px; letter-spacing: 2px; color: #94a3b8;
+  margin-bottom: 4px;
+}
+.sahp-timer-bar {
+  height: 3px; background: #1e293b;
+  border-radius: 2px; overflow: hidden;
+  margin-bottom: 18px;
+}
+.sahp-timer-fill {
+  height: 100%; width: 100%;
+  background: linear-gradient(90deg, #00d0ff, #38bdf8);
+  box-shadow: 0 0 8px #00d0ff;
+  transition: width 0.1s linear;
+}
+.sahp-target {
+  background: #0f1f33;
+  border: 1px solid #1e3a5f;
+  border-radius: 6px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+}
+.sahp-target-label {
+  text-align: center; color: #94a3b8;
+  font-size: 10px; letter-spacing: 4px;
+  margin-bottom: 10px;
+}
+.sahp-target-cells {
+  display: flex; justify-content: center; align-items: center;
+  gap: 8px; flex-wrap: wrap;
+}
+.sahp-target-cell {
+  width: 60px; padding: 10px 0;
+  text-align: center;
+  background: #0a1929;
+  border: 1px solid #1e3a5f;
+  border-radius: 4px;
+  font-size: 16px;
+  color: #cbd5e1; font-weight: bold;
+  transition: all 0.2s;
+}
+.sahp-target-cell.active {
+  border-color: #00d0ff;
+  background: #0c2540;
+  box-shadow: 0 0 10px rgba(0,208,255,0.6);
+  color: #00d0ff;
+  text-shadow: 0 0 8px #00d0ff;
+}
+.sahp-target-cell.done {
+  border-color: #16a34a;
+  background: #052e1a;
+  color: #16a34a;
+}
+.sahp-arrow { color: #475569; font-size: 16px; }
+.sahp-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.sahp-cell {
+  background: #0f1f33;
+  border: 1px solid #1e3a5f;
+  border-radius: 4px;
+  padding: 14px 0;
+  text-align: center;
+  font-size: 17px; font-weight: bold;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.sahp-cell:hover {
+  background: #1a3050;
+  border-color: #00d0ff;
+  color: #00d0ff;
+}
+.sahp-cell.found {
+  background: #052e1a;
+  border-color: #16a34a;
+  color: #16a34a;
+  pointer-events: none;
+}
+.sahp-cell.wrong { animation: shakeRed 0.4s; }
+.sahp-status {
+  text-align: center; margin-top: 14px;
+  font-size: 12px; letter-spacing: 2px;
+  color: #94a3b8; min-height: 18px;
+}
+.sahp-status.fail { color: #ef4444; text-shadow: 0 0 8px #ef4444; }
+.sahp-status.win  { color: #16a34a; text-shadow: 0 0 8px #16a34a; }
+@keyframes shakeRed {
+  0%,100% { background:#0f1f33; border-color:#1e3a5f; color:#cbd5e1; transform:translateX(0);}
+  25%     { background:#3b0a0a; border-color:#ef4444; color:#ef4444; transform:translateX(-4px);}
+  75%     { background:#3b0a0a; border-color:#ef4444; color:#ef4444; transform:translateX(4px);}
+}
+
+/* ============= TERMINAL (overlay fullscreen) ============= */
+#matrix-bg {
+  position: fixed; top:0; left:0;
+  width:100%; height:100%;
+  z-index: 15; opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s;
+}
+#matrix-bg.show { opacity: 0.15; }
+#terminal-overlay {
+  position: fixed; inset: 0;
+  z-index: 18;
+  background: #000;
+  display: none;
+  transition: opacity 0.6s;
+}
+#terminal-overlay.show { display: block; }
+#terminal-overlay.hide { opacity: 0; pointer-events: none; }
+#terminal {
+  height: 100%; overflow-y: auto;
+  padding: 18px;
+  color: #00ff41;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 0 5px #00ff41;
+  font-size: 15px;
+  line-height: 1.35;
+}
+.line { margin: 1px 0; white-space: pre-wrap; word-wrap: break-word; }
+.line.error   { color: #ff2640; text-shadow: 0 0 5px #ff2640; }
+.line.warning { color: #ffaa00; text-shadow: 0 0 5px #ffaa00; }
+.line.info    { color: #00d0ff; text-shadow: 0 0 5px #00d0ff; }
+.line.success { color: #00ff41; }
+.line.dim     { opacity: 0.45; }
+.line.big     { font-size: 18px; font-weight: bold; }
+.glitch { animation: glitch 0.25s steps(2) infinite; display: inline-block; }
+@keyframes glitch {
+  0%   { transform: translate(0,0); }
+  25%  { transform: translate(-2px,1px); text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff; }
+  50%  { transform: translate(2px,-1px); text-shadow: -2px 0 #ff00ff, 2px 0 #00ffff; }
+  75%  { transform: translate(-1px,-2px); }
+  100% { transform: translate(0,0); }
+}
+#input-line { display: flex; align-items: center; padding: 4px 0; }
+#input-line.hidden { display: none; }
+#prompt { margin-right: 8px; color: #00ff41; white-space: nowrap; }
+#cmd-input {
+  background: transparent; border: none;
+  color: #00ff41;
+  font-family: 'Courier New', monospace;
+  font-size: 15px; flex: 1; outline: none;
+  text-shadow: 0 0 5px #00ff41;
+  caret-color: #00ff41;
+}
+.ascii-art {
+  color: #00ff41; font-size: 10px; line-height: 11px;
+  margin: 4px 0; white-space: pre;
+}
+.box { color: #00d0ff; text-shadow: 0 0 5px #00d0ff; font-weight: bold; }
+#terminal::-webkit-scrollbar { width: 8px; }
+#terminal::-webkit-scrollbar-track { background: #001a05; }
+#terminal::-webkit-scrollbar-thumb { background: #00ff41; }
+
+/* ============= ALARM SCREEN ============= */
+#alarm-screen {
+  position: fixed; inset: 0;
+  z-index: 50;
+  background: #000;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: alarmFlash 0.4s infinite;
+}
+#alarm-screen.show { display: flex; }
+@keyframes alarmFlash {
+  0%,49%   { background: #b91c1c; }
+  50%,100% { background: #000; }
+}
+.alarm-icon {
+  font-size: 80px;
+  animation: shake 0.15s infinite;
+}
+@keyframes shake {
+  0%,100% { transform: translate(0,0); }
+  25%     { transform: translate(-4px,4px); }
+  75%     { transform: translate(4px,-4px); }
+}
+.alarm-title {
+  font-size: 36px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: #fff;
+  text-shadow: 0 0 20px #ef4444, 0 0 40px #ef4444;
+  margin-top: 10px;
+}
+.alarm-sub {
+  font-size: 16px;
+  color: #fef2f2;
+  margin-top: 12px;
+  letter-spacing: 3px;
+  text-align: center;
+  padding: 0 20px;
+}
+.alarm-countdown {
+  margin-top: 24px;
+  font-size: 14px;
+  color: #fca5a5;
+  letter-spacing: 4px;
+}
+
+/* glitch transition */
+#glitch-overlay {
+  position: fixed; inset: 0;
+  z-index: 100;
+  background: #000;
+  display: none;
+  pointer-events: none;
+}
+#glitch-overlay.show {
+  display: block;
+  animation: globalGlitch 0.6s steps(8);
+}
+@keyframes globalGlitch {
+  0%   { background: #000; opacity: 0; }
+  10%  { background: #00ff41; opacity: 0.5; }
+  20%  { background: #ff00ff; opacity: 0.3; }
+  30%  { background: #000; opacity: 0.8; }
+  40%  { background: #00ffff; opacity: 0.4; }
+  60%  { background: #000; opacity: 1; }
+  100% { background: #000; opacity: 0; }
+}
 </style>
 </head>
 <body>
 
-<!-- ========== INTRO : MINI-JEU SAHP ========== -->
+<!-- ============= MATRIX BG ============= -->
+<canvas id="matrix-bg"></canvas>
+
+<!-- ============= PHONE ============= -->
+<div id="phone">
+  <div id="phone-screen">
+    <div class="notch"></div>
+    <div class="status-bar">
+      <span id="status-time">14:37</span>
+      <span class="right">📶 5G 🔋87%</span>
+    </div>
+
+    <!-- HOME SCREEN -->
+    <div id="home-screen" class="screen active">
+      <div class="home-time" id="big-time">14:37</div>
+      <div class="home-date">Jeudi 14 Mai</div>
+      <div class="app-grid">
+        <div class="app" data-app="messages"><div class="app-icon bg-green">💬</div><div class="app-name">Messages</div></div>
+        <div class="app" data-app="photos"><div class="app-icon bg-pink">📷</div><div class="app-name">Photos</div></div>
+        <div class="app" data-app="music"><div class="app-icon bg-red">🎵</div><div class="app-name">Music</div></div>
+        <div class="app" data-app="snake"><div class="app-icon bg-yellow">🐍</div><div class="app-name">Snake</div></div>
+        <div class="app" data-app="weather"><div class="app-icon bg-blue">☁️</div><div class="app-name">Météo</div></div>
+        <div class="app" data-app="food"><div class="app-icon bg-orange">🍔</div><div class="app-name">EatUp</div></div>
+        <div class="app" data-app="casino"><div class="app-icon bg-purple">🎰</div><div class="app-name">Casino</div></div>
+        <div class="app" data-app="calendar"><div class="app-icon bg-teal">📅</div><div class="app-name">Calendar</div></div>
+        <div class="app" data-app="settings"><div class="app-icon bg-gray">⚙️</div><div class="app-name">Réglages</div></div>
+        <div class="app" data-app="browser"><div class="app-icon bg-dark">🌐</div><div class="app-name">Browser</div></div>
+        <div class="app" data-app="game"><div class="app-icon bg-purple">🎮</div><div class="app-name">RagePlay</div></div>
+        <div class="app" data-app="fleeca"><div class="app-icon bg-fleeca">🏦</div><div class="app-name">Fleeca</div></div>
+      </div>
+    </div>
+
+    <!-- FLEECA LOGIN -->
+    <div id="fleeca-login" class="screen">
+      <button class="fleeca-back" onclick="goHome()">← Accueil</button>
+      <div class="fleeca-header">
+        <div class="fleeca-logo">FLEECA</div>
+        <div class="fleeca-tag">BANK · SECURE ACCESS</div>
+      </div>
+      <div class="fleeca-welcome">Bienvenue dans votre espace bancaire sécurisé</div>
+      <div class="fleeca-field">
+        <div class="label">UTILISATEUR</div>
+        <div class="val">m.donovan@fleeca.bk</div>
+      </div>
+      <div class="fleeca-field">
+        <div class="label">MOT DE PASSE</div>
+        <div class="val">••••••••••••</div>
+      </div>
+      <button class="fleeca-btn locked">🔒 ACCÈS CLIENT — VERROUILLÉ</button>
+      <button class="fleeca-btn danger" onclick="startHack()">⚠ ACCÈS MANAGER</button>
+      <div class="fleeca-footer-warning">⚠ ACCÈS RÉSERVÉ — TENTATIVE SURVEILLÉE</div>
+    </div>
+
+    <!-- FLEECA ADMIN (après hack) -->
+    <div id="fleeca-admin" class="screen">
+      <div class="fleeca-header">
+        <div class="fleeca-logo">FLEECA</div>
+        <div class="fleeca-tag">ADMIN · NIVEAU 3</div>
+      </div>
+      <div class="admin-banner">⚠ ALARME SILENCIEUSE ACTIVE ⚠</div>
+      <div class="admin-stat"><span class="lbl">SOLDE COFFRE PRINCIPAL</span><span class="val">$2,847,392</span></div>
+      <div class="admin-stat"><span class="lbl">COMPTES ACTIFS</span><span class="val">1,247</span></div>
+      <div class="admin-stat"><span class="lbl">DERNIÈRE CONNEXION</span><span class="val">il y a 2 min</span></div>
+      <div class="admin-stat"><span class="lbl">STATUT SÉCURITÉ</span><span class="val" style="color:#ef4444">COMPROMIS</span></div>
+      <button class="fleeca-btn danger" style="margin-top:18px" onclick="startBypassGame()">
+        🔓 BYPASS ALARME — CODE DU JOUR
+      </button>
+      <div class="fleeca-footer-warning">Une seule tentative. Échec = alarme déclenchée.</div>
+    </div>
+
+    <!-- FLEECA BYPASS GAME -->
+    <div id="fleeca-bypass" class="screen">
+      <div class="bypass-title">BYPASS ALARME</div>
+      <div class="bypass-sub">ARRÊTE LE CURSEUR DANS LA ZONE VERTE</div>
+      <div class="bypass-round-info" id="bypass-round-info">MANCHE 1 / 3</div>
+      <div class="bypass-bar-container">
+        <div class="bypass-bar" id="bypass-bar">
+          <div class="bypass-zone" id="bypass-zone"></div>
+          <div class="bypass-indicator" id="bypass-indicator"></div>
+        </div>
+      </div>
+      <div class="bypass-instructions">
+        Le curseur rouge se déplace de gauche à droite.<br>
+        Clique sur <b>STOP</b> quand il est dans la zone verte.<br>
+        <span style="color:#ef4444">⚠ Une seule erreur = alarme !</span>
+      </div>
+      <button class="bypass-stop" id="bypass-stop">STOP</button>
+      <div class="bypass-progress" id="bypass-progress">
+        <div class="bypass-dot current"></div>
+        <div class="bypass-dot"></div>
+        <div class="bypass-dot"></div>
+      </div>
+    </div>
+
+    <!-- FLEECA SUCCESS -->
+    <div id="fleeca-success" class="screen">
+      <div class="fleeca-header">
+        <div class="fleeca-logo">FLEECA</div>
+        <div class="fleeca-tag">COFFRE DÉVERROUILLÉ</div>
+      </div>
+      <div class="vault-icon">🔓</div>
+      <div class="success-title">ALARME NEUTRALISÉE</div>
+      <div class="success-sub">CODE DU JOUR GÉNÉRÉ</div>
+      <div class="code-box">
+        <div class="lbl">CODE D'ACCÈS — VALIDE 24H</div>
+        <div class="code-digits">
+          <div class="code-digit">2</div>
+          <div class="code-digit">9</div>
+          <div class="code-digit">4</div>
+          <div class="code-digit">1</div>
+        </div>
+      </div>
+      <div class="success-time" id="success-time">Généré à <span></span></div>
+      <button class="fleeca-btn primary" style="margin-top:18px" onclick="resetAll()">🔄 NOUVELLE SESSION</button>
+    </div>
+
+    <!-- APP POPUP -->
+    <div id="app-popup">
+      <div class="popup-box">
+        <div class="popup-icon" id="popup-icon">📱</div>
+        <div class="popup-title" id="popup-title">App</div>
+        <div class="popup-text" id="popup-text">...</div>
+        <button class="popup-btn" onclick="closePopup()">Fermer</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============= GLITCH TRANSITION ============= -->
+<div id="glitch-overlay"></div>
+
+<!-- ============= INTRO SAHP ============= -->
 <div id="intro-screen">
   <div class="sahp-panel">
     <div class="sahp-title">DÉCRYPTAGE — PROTOCOLE SAHP</div>
     <div class="sahp-subtitle">CLIQUEZ LES CODES DANS L'ORDRE INDIQUÉ</div>
-
     <div class="sahp-timer-row">
       <span>TEMPS RESTANT</span>
       <span id="sahp-time">10.0s</span>
     </div>
     <div class="sahp-timer-bar"><div class="sahp-timer-fill" id="sahp-timer-fill"></div></div>
-
     <div class="sahp-target">
       <div class="sahp-target-label">SÉQUENCE CIBLE</div>
       <div class="sahp-target-cells" id="sahp-target"></div>
     </div>
-
     <div class="sahp-grid" id="sahp-grid"></div>
     <div class="sahp-status" id="sahp-status">&nbsp;</div>
   </div>
 </div>
 
-<!-- ========== TERMINAL ========== -->
-<canvas id="matrix-bg"></canvas>
-<div id="terminal">
-  <div id="output"></div>
-  <div id="input-line" style="display:none;">
-    <span id="prompt">root@hack:~$</span>
-    <input id="cmd-input" autocomplete="off" spellcheck="false" autofocus>
+<!-- ============= TERMINAL ============= -->
+<div id="terminal-overlay">
+  <div id="terminal">
+    <div id="output"></div>
+    <div id="input-line" class="hidden">
+      <span id="prompt">root@hack:~$</span>
+      <input id="cmd-input" autocomplete="off" spellcheck="false">
+    </div>
   </div>
 </div>
 
+<!-- ============= ALARM ============= -->
+<div id="alarm-screen">
+  <div class="alarm-icon">🚨</div>
+  <div class="alarm-title">INTRUSION DÉTECTÉE</div>
+  <div class="alarm-sub">ALARME DÉCLENCHÉE<br>POLICE EN ROUTE — SESSION ANNULÉE</div>
+  <div class="alarm-countdown" id="alarm-countdown">RESET DANS 3...</div>
+</div>
+
 <script>
-/* ============ MINI-JEU INTRO : SAHP ============ */
-const introScreen = document.getElementById('intro-screen');
+/* ============================================================
+   AUDIO (synthétisé)
+============================================================ */
+let audioCtx = null;
+function ensureAudio(){
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch(e) { return false; }
+  }
+  return true;
+}
+function beep(freq, duration, type='square', vol=0.04){
+  if (!ensureAudio()) return;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.value = vol;
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start();
+  o.stop(audioCtx.currentTime + duration);
+}
+function alarmSiren(){
+  if (!ensureAudio()) return;
+  for (let i = 0; i < 6; i++){
+    setTimeout(()=>{
+      beep(900, 0.25, 'sawtooth', 0.06);
+      setTimeout(()=>beep(600, 0.25, 'sawtooth', 0.06), 250);
+    }, i * 500);
+  }
+}
+
+/* ============================================================
+   HORLOGE
+============================================================ */
+function updateClock(){
+  const d = new Date();
+  const h = String(d.getHours()).padStart(2,'0');
+  const m = String(d.getMinutes()).padStart(2,'0');
+  document.getElementById('status-time').textContent = h+':'+m;
+  document.getElementById('big-time').textContent = h+':'+m;
+}
+updateClock();
+setInterval(updateClock, 30000);
+
+/* ============================================================
+   NAVIGATION DES ÉCRANS
+============================================================ */
+function showScreen(id){
+  document.querySelectorAll('#phone-screen > .screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goHome(){ showScreen('home-screen'); }
+
+/* ============================================================
+   APPS INUTILES
+============================================================ */
+const APP_MSGS = {
+  messages: { icon:'💬', title:'Messages', text:'Aucun message.<br><br>Pas même un spam. Forever alone.' },
+  photos:   { icon:'📷', title:'Photos',   text:'67 selfies ratés détectés.<br><br>Vraiment continuer ?' },
+  music:    { icon:'🎵', title:'Music+',   text:'Abonnement expiré depuis 2019.<br><br>Renouvellement : 9,99€/mois.' },
+  snake:    { icon:'🐍', title:'Snake',    text:'GAME OVER<br><br>Tu as perdu avant même d\'avoir commencé.' },
+  weather:  { icon:'☁️', title:'Météo',    text:'Los Santos : il pleut.<br>Demain : il pleuvra.<br>Toujours.' },
+  food:     { icon:'🍔', title:'EatUp',    text:'Tous les restos sont fermés.<br><br>Cuisine toi-même pour une fois.' },
+  casino:   { icon:'🎰', title:'Casino',   text:'SOLDE ACTUEL : -2 847 €<br><br>Continuer à parier ? (Mauvaise idée)' },
+  calendar: { icon:'📅', title:'Calendar', text:'Aucun rendez-vous prévu.<br>Aucun ami connecté.<br>Aucune notification.' },
+  settings: { icon:'⚙️', title:'Réglages', text:'Accès refusé.<br><br>Veuillez rebooter votre cerveau.' },
+  browser:  { icon:'🌐', title:'Browser',  text:'Historique :<br>• comment.devenir.riche.fr<br>• gta.online.cheats<br>• vol.banque.tutoriel' },
+  game:     { icon:'🎮', title:'RagePlay', text:'Erreur 404 — fun introuvable.<br><br>(Désinstaller cette app ?)' },
+};
+
+document.querySelectorAll('.app').forEach(el => {
+  el.addEventListener('click', () => {
+    const id = el.dataset.app;
+    if (id === 'fleeca'){
+      ensureAudio();
+      beep(800, 0.05, 'sine', 0.05);
+      showScreen('fleeca-login');
+    } else {
+      const m = APP_MSGS[id];
+      ensureAudio();
+      beep(440, 0.04, 'square', 0.03);
+      document.getElementById('popup-icon').textContent = m.icon;
+      document.getElementById('popup-title').textContent = m.title;
+      document.getElementById('popup-text').innerHTML = m.text;
+      document.getElementById('app-popup').classList.add('show');
+    }
+  });
+});
+function closePopup(){ document.getElementById('app-popup').classList.remove('show'); }
+
+/* ============================================================
+   GLITCH TRANSITION
+============================================================ */
+async function glitchTransition(){
+  const ov = document.getElementById('glitch-overlay');
+  ov.classList.add('show');
+  beep(150, 0.3, 'sawtooth', 0.08);
+  setTimeout(()=>beep(80, 0.3, 'sawtooth', 0.08), 200);
+  await new Promise(r => setTimeout(r, 600));
+  ov.classList.remove('show');
+}
+
+/* ============================================================
+   DÉMARRAGE DU HACK (depuis Fleeca login)
+============================================================ */
+async function startHack(){
+  ensureAudio();
+  beep(200, 0.15, 'sawtooth', 0.06);
+  await glitchTransition();
+  document.getElementById('phone').style.display = 'none';
+  document.getElementById('matrix-bg').classList.add('show');
+  document.getElementById('intro-screen').classList.add('show');
+  setupSAHP();
+}
+
+/* ============================================================
+   MINI-JEU SAHP
+============================================================ */
 const sahpGrid    = document.getElementById('sahp-grid');
 const sahpTarget  = document.getElementById('sahp-target');
 const sahpTimerEl = document.getElementById('sahp-time');
 const sahpFill    = document.getElementById('sahp-timer-fill');
 const sahpStatus  = document.getElementById('sahp-status');
-
 const SAHP_DURATION = 10;
 let sahpInterval = null;
-let sahpTimeLeft = SAHP_DURATION;
-let sahpSequence = [];
-let sahpStep = 0;
-let sahpGridCodes = [];
-let sahpFinished = false;
+let sahpTimeLeft, sahpSequence, sahpStep, sahpGridCodes, sahpFinished;
 
-function randHex(){
-  return Math.floor(Math.random()*256).toString(16).toUpperCase().padStart(2,'0');
-}
+function randHex(){ return Math.floor(Math.random()*256).toString(16).toUpperCase().padStart(2,'0'); }
 function shuffle(arr){
   for (let i=arr.length-1;i>0;i--){
     const j = Math.floor(Math.random()*(i+1));
@@ -297,23 +1072,20 @@ function setupSAHP(){
   const set = new Set();
   while (set.size < 4) set.add(randHex());
   sahpSequence = [...set];
-
-  const allCodes = new Set(sahpSequence);
-  while (allCodes.size < 25) allCodes.add(randHex());
-  sahpGridCodes = shuffle([...allCodes]);
+  const all = new Set(sahpSequence);
+  while (all.size < 25) all.add(randHex());
+  sahpGridCodes = shuffle([...all]);
 
   sahpTarget.innerHTML = '';
   sahpSequence.forEach((code, i) => {
     if (i > 0){
-      const arrow = document.createElement('span');
-      arrow.className = 'sahp-arrow';
-      arrow.textContent = '▸';
-      sahpTarget.appendChild(arrow);
+      const ar = document.createElement('span');
+      ar.className = 'sahp-arrow'; ar.textContent = '▸';
+      sahpTarget.appendChild(ar);
     }
     const c = document.createElement('div');
     c.className = 'sahp-target-cell' + (i === 0 ? ' active' : '');
     c.textContent = code;
-    c.dataset.idx = i;
     sahpTarget.appendChild(c);
   });
 
@@ -334,7 +1106,6 @@ function setupSAHP(){
   sahpStatus.className = 'sahp-status';
   sahpFill.style.width = '100%';
   sahpTimerEl.textContent = SAHP_DURATION.toFixed(1)+'s';
-
   clearInterval(sahpInterval);
   sahpInterval = setInterval(tickSAHP, 100);
 }
@@ -343,7 +1114,6 @@ function tickSAHP(){
   if (sahpFinished) return;
   sahpTimeLeft -= 0.1;
   if (sahpTimeLeft <= 0){
-    sahpTimeLeft = 0;
     sahpTimerEl.textContent = '0.0s';
     sahpFill.style.width = '0%';
     failSAHP('TEMPS ECOULE - NOUVELLE TENTATIVE');
@@ -357,19 +1127,17 @@ function onSahpClick(cell){
   if (sahpFinished) return;
   const code = cell.dataset.code;
   const expected = sahpSequence[sahpStep];
-
   if (code === expected){
+    beep(880, 0.05, 'sine', 0.04);
     cell.classList.add('found');
     const tc = sahpTarget.querySelectorAll('.sahp-target-cell');
     tc[sahpStep].classList.remove('active');
     tc[sahpStep].classList.add('done');
     sahpStep++;
-    if (sahpStep >= sahpSequence.length){
-      winSAHP();
-    } else {
-      tc[sahpStep].classList.add('active');
-    }
+    if (sahpStep >= sahpSequence.length) winSAHP();
+    else tc[sahpStep].classList.add('active');
   } else {
+    beep(200, 0.15, 'sawtooth', 0.05);
     cell.classList.add('wrong');
     setTimeout(()=>cell.classList.remove('wrong'), 400);
     failSAHP('CODE INCORRECT - SEQUENCE REINITIALISEE');
@@ -386,20 +1154,19 @@ function failSAHP(msg){
 function winSAHP(){
   sahpFinished = true;
   clearInterval(sahpInterval);
+  beep(1200, 0.3, 'sine', 0.05);
   sahpStatus.textContent = 'PROTOCOLE DECRYPTE - ACCES DARKNET AUTORISE';
   sahpStatus.className = 'sahp-status win';
   setTimeout(() => {
-    introScreen.classList.add('hide');
-    setTimeout(() => {
-      introScreen.style.display = 'none';
-      bootSequence();
-    }, 650);
+    document.getElementById('intro-screen').classList.remove('show');
+    document.getElementById('terminal-overlay').classList.add('show');
+    bootSequence();
   }, 1000);
 }
 
-setupSAHP();
-
-/* ============ MATRIX BACKGROUND ============ */
+/* ============================================================
+   MATRIX BACKGROUND
+============================================================ */
 const canvas = document.getElementById('matrix-bg');
 const ctx = canvas.getContext('2d');
 function resize(){ canvas.width = innerWidth; canvas.height = innerHeight; }
@@ -428,7 +1195,9 @@ setInterval(()=>{
   }
 }, 55);
 
-/* ============ TERMINAL ============ */
+/* ============================================================
+   TERMINAL
+============================================================ */
 const output = document.getElementById('output');
 const inputLine = document.getElementById('input-line');
 const cmdInput = document.getElementById('cmd-input');
@@ -440,14 +1209,12 @@ let state = {};
 
 const sleep = ms => new Promise(r=>setTimeout(r,ms));
 function scrollDown(){ terminal.scrollTop = terminal.scrollHeight; }
-
 function addLine(text, cls=''){
   const d = document.createElement('div');
   d.className = 'line '+cls;
   d.textContent = text;
   output.appendChild(d);
   scrollDown();
-  return d;
 }
 function addHTML(html, cls=''){
   const d = document.createElement('div');
@@ -455,9 +1222,8 @@ function addHTML(html, cls=''){
   d.innerHTML = html;
   output.appendChild(d);
   scrollDown();
-  return d;
 }
-async function typeLine(text, cls='', speed=15){
+async function typeLine(text, cls='', speed=14){
   const d = document.createElement('div');
   d.className = 'line '+cls;
   output.appendChild(d);
@@ -466,9 +1232,7 @@ async function typeLine(text, cls='', speed=15){
     scrollDown();
     await sleep(speed);
   }
-  return d;
 }
-
 const fakeCodes = [
   '> 0x7FA3...injecting payload...',
   '> SEGFAULT @ 0xDEADBEEF',
@@ -489,25 +1253,23 @@ const fakeCodes = [
   '> proxy chain: TOR -> VPN -> SSH -> ...',
   '> CVE-2024-XX42 vulnerability confirmed',
 ];
-async function glitchBurst(count=5, delay=70){
-  for (let i=0;i<count;i++){
-    const c = fakeCodes[Math.floor(Math.random()*fakeCodes.length)];
-    addLine(c, 'dim glitch');
+async function glitchBurst(n=5, delay=70){
+  for (let i=0;i<n;i++){
+    addLine(fakeCodes[Math.floor(Math.random()*fakeCodes.length)], 'dim glitch');
     await sleep(delay);
   }
 }
-
-function showInput(){ inputLine.style.display='flex'; cmdInput.value=''; cmdInput.focus(); scrollDown(); }
-function hideInput(){ inputLine.style.display='none'; }
+function showInput(){ inputLine.classList.remove('hidden'); cmdInput.value=''; cmdInput.focus(); scrollDown(); }
+function hideInput(){ inputLine.classList.add('hidden'); }
 
 async function bootSequence(){
+  output.innerHTML = '';
   hideInput();
-  await typeLine('[INTRUSION] Protocole SAHP decrypte avec succes.', 'info', 18);
-  await typeLine('[INTRUSION] Bypass du portail DARKNET en cours...', 'info', 18);
-  await sleep(300);
-  await glitchBurst(5, 70);
-  await typeLine('Initialisation du systeme...', 'info', 25);
-  await sleep(250);
+  await typeLine('[INTRUSION] Protocole SAHP decrypte avec succes.', 'info', 16);
+  await typeLine('[INTRUSION] Connexion au serveur FLEECA en cours...', 'info', 16);
+  await sleep(200);
+  await glitchBurst(5, 60);
+  await typeLine('Initialisation du systeme...', 'info', 22);
   const bootMsgs = [
     '[ OK ] Chargement du noyau Linux 5.15.0-hack',
     '[ OK ] Montage du systeme de fichiers crypte (LUKS)',
@@ -516,44 +1278,34 @@ async function bootSequence(){
     '[ OK ] Activation du VPN multicouche (5/5 noeuds)',
     '[ OK ] Chargement de la suite Metasploit v6.3',
     '[ OK ] Outils nmap / hydra / john pretes',
-    '[ OK ] Effacement des logs systeme',
+    '[ OK ] Effacement des logs Fleeca',
   ];
-  for (const m of bootMsgs){
-    addLine(m, 'success');
-    await sleep(90);
-  }
+  for (const m of bootMsgs){ addLine(m, 'success'); await sleep(80); }
   await sleep(200);
-  addLine('[ !! ] DETECTION: connexion non autorisee detectee ???', 'warning');
-  await sleep(400);
-  await glitchBurst(7, 80);
-  await sleep(250);
+  addLine('[ !! ] DETECTION: connexion non autorisee ???', 'warning');
+  await sleep(300);
+  await glitchBurst(6, 70);
   addLine('[ OK ] Faux positif - systeme stabilise', 'success');
-  await sleep(400);
-
+  await sleep(300);
   addHTML(`<pre class="ascii-art success">
- ████████▄     ▄████████    ▄████████    ▄█   ▄█▄  ███▄▄▄▄      ▄████████     ███     
- ███   ▀███   ███    ███   ███    ███   ███ ▄███▀  ███▀▀▀██▄   ███    ███ ▀█████████▄ 
- ███    ███   ███    ███   ███    ███   ███▐██▀    ███   ███   ███    █▀     ▀███▀▀██ 
- ███    ███   ███    ███  ▄███▄▄▄▄██▀  ▄█████▀     ███   ███  ▄███▄▄▄         ███   ▀ 
- ███    ███ ▀███████████ ▀▀███▀▀▀▀▀   ▀▀█████▄     ███   ███ ▀▀███▀▀▀         ███     
- ███    ███   ███    ███ ▀███████████   ███▐██▄    ███   ███   ███    █▄      ███     
- ███   ▄███   ███    ███   ███    ███   ███ ▀███▄  ███   ███   ███    ███     ███     
- ████████▀    ███    █▀    ███    ███   ███   ▀█▀   ▀█   █▀    ██████████    ▄████▀   
-                           ███    ███   ▀                                            
-            T E R M I N A L   v 3 . 7   --   A C C E S S   N O D E   0 x 4 A 2 F
+        ████████╗██╗  ██╗███████╗    ██╗  ██╗ █████╗  ██████╗██╗  ██╗
+        ╚══██╔══╝██║  ██║██╔════╝    ██║  ██║██╔══██╗██╔════╝██║ ██╔╝
+           ██║   ███████║█████╗      ███████║███████║██║     █████╔╝ 
+           ██║   ██╔══██║██╔══╝      ██╔══██║██╔══██║██║     ██╔═██╗ 
+           ██║   ██║  ██║███████╗    ██║  ██║██║  ██║╚██████╗██║  ██╗
+           ╚═╝   ╚═╝  ╚═╝╚══════╝    ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
+              CIBLE : FLEECA BANK -- ACCES MANAGER -- 3 DEFIS
   </pre>`);
-
-  await sleep(700);
-  addHTML('<div class="box">+===========================================================+</div>');
-  addHTML('<div class="box">|   MISSION : Infiltrer le coffre-fort CRYPTOBANK            |</div>');
-  addHTML('<div class="box">|   OBJECTIF: Recuperer le code d\'acces a 4 chiffres         |</div>');
-  addHTML('<div class="box">|   EPREUVES: 3 defis - du plus facile au plus dur           |</div>');
-  addHTML('<div class="box">+===========================================================+</div>');
-  await sleep(400);
+  await sleep(500);
+  addHTML('<div class="box">+============================================================+</div>');
+  addHTML('<div class="box">|  MISSION : Obtenir l\'acces manager Fleeca                  |</div>');
+  addHTML('<div class="box">|  OBJECTIF: Reussir 3 epreuves pour retourner dans l\'app    |</div>');
+  addHTML('<div class="box">|  DEFIS   : Cesar (facile) -> Firewall -> Binaire (dur)     |</div>');
+  addHTML('<div class="box">+============================================================+</div>');
+  await sleep(300);
   addLine('', '');
-  await typeLine('>> Tape "help" pour voir les commandes disponibles.', 'warning', 12);
+  await typeLine('>> Tape "help" pour voir les commandes.', 'warning', 12);
   await typeLine('>> Tape "start" pour commencer la mission.', 'warning', 12);
-  addLine('', '');
   stage = 'menu';
   promptEl.textContent = 'root@darknet:~$';
   showInput();
@@ -566,21 +1318,18 @@ async function startGame1(){
   addLine('+==========================================+', 'info');
   addLine('|   DEFI 1/3 - DECRYPTAGE CESAR (FACILE)   |', 'info');
   addLine('+==========================================+', 'info');
-  await sleep(300);
   addLine('', '');
-  await typeLine('Tu as intercepte un message chiffre par CESAR (decalage +3).', '', 12);
-  await typeLine('Chaque lettre du message a ete decalee de 3 vers la DROITE.', '', 12);
-  await typeLine('Pour le decrypter, tu dois decaler chaque lettre de 3 vers la GAUCHE.', '', 12);
+  await typeLine('Tu as intercepte un message chiffre par CESAR (decalage +3).', '', 11);
+  await typeLine('Chaque lettre du message a ete decalee de 3 vers la DROITE.', '', 11);
+  await typeLine('Pour le decrypter, decale chaque lettre de 3 vers la GAUCHE.', '', 11);
   addLine('', '');
   addLine('  Exemple : A -> D,  B -> E,  C -> F  (chiffrement)', 'dim');
-  addLine('  Donc pour dechiffrer  : D -> A,  E -> B,  F -> C', 'dim');
+  addLine('  Donc pour dechiffrer : D -> A,  E -> B,  F -> C', 'dim');
   addLine('', '');
   addLine('  >>> MESSAGE CHIFFRE : KDFN  <<<', 'success big');
   addLine('', '');
-  addLine('  Aide pas a pas :  K -> ?,  D -> ?,  F -> ?,  K -> ?', 'warning');
-  addLine('', '');
-  addLine('  COMMANDE A TAPER :  decrypt <mot>', 'info');
-  addLine('  (exemple : decrypt blabla)', 'dim');
+  addLine('  Aide : K -> ?,  D -> ?,  F -> ?,  K -> ?', 'warning');
+  addLine('  COMMANDE : decrypt <mot>', 'info');
   stage = 'game1';
   promptEl.textContent = 'hacker@cryptobank:~$';
   showInput();
@@ -593,18 +1342,16 @@ async function startGame2(){
   addLine('+============================================+', 'info');
   addLine('|  DEFI 2/3 - INTRUSION FIREWALL (MOYEN)     |', 'info');
   addLine('+============================================+', 'info');
-  await sleep(300);
   addLine('', '');
-  await typeLine('Tu dois contourner le pare-feu de CRYPTOBANK en 4 etapes.', '', 12);
-  await typeLine('Tape les commandes UNE PAR UNE dans LE BON ORDRE :', '', 12);
+  await typeLine('Tu dois contourner le pare-feu de FLEECA en 4 etapes.', '', 11);
+  await typeLine('Tape les commandes UNE PAR UNE dans LE BON ORDRE :', '', 11);
   addLine('', '');
   addLine('   1. scan      -> scanner les ports ouverts', 'warning');
-  addLine('   2. connect   -> etablir une connexion sur le port trouve', 'warning');
-  addLine('   3. bypass    -> contourner la securite du firewall', 'warning');
-  addLine('   4. inject    -> injecter le payload final', 'warning');
+  addLine('   2. connect   -> etablir une connexion', 'warning');
+  addLine('   3. bypass    -> contourner la securite', 'warning');
+  addLine('   4. inject    -> injecter le payload', 'warning');
   addLine('', '');
-  addLine('   /!\\  Si tu te trompes d\'ordre, le firewall te detecte', 'error');
-  addLine('   /!\\  et tu recommences au debut !', 'error');
+  addLine('   /!\\  Mauvais ordre = retour au debut !', 'error');
   addLine('', '');
   addLine('   >>> ETAPE 1/4 - tape "scan"  <<<', 'success big');
   state.g2 = 1;
@@ -620,13 +1367,11 @@ async function startGame3(){
   addLine('+============================================+', 'info');
   addLine('|  DEFI 3/3 - CRYPTANALYSE BINAIRE (DUR)     |', 'info');
   addLine('+============================================+', 'info');
-  await sleep(300);
   addLine('', '');
-  await typeLine('Tu as recupere 3 cles chiffrees en BINAIRE.', '', 12);
-  await typeLine('Tu dois CONVERTIR chaque cle en DECIMAL puis ADDITIONNER les 3 resultats.', '', 12);
+  await typeLine('Tu as recupere 3 cles chiffrees en BINAIRE.', '', 11);
+  await typeLine('Convertis chaque cle en DECIMAL puis ADDITIONNE les 3.', '', 11);
   addLine('', '');
   addLine('  RAPPEL : binaire -> decimal', 'warning');
-  addLine('  Chaque bit vaut une puissance de 2 (de droite a gauche) :', 'dim');
   addLine('  position : 7  6  5  4  3  2  1  0', 'dim');
   addLine('  valeur   :128 64 32 16  8  4  2  1', 'dim');
   addLine('  Ex : 00001011 = 0+0+0+0+8+0+2+1 = 11', 'dim');
@@ -635,188 +1380,136 @@ async function startGame3(){
   addLine('   >>>  CLE 2 :  00110011  =  ?', 'success');
   addLine('   >>>  CLE 3 :  01100110  =  ?', 'success');
   addLine('', '');
-  addLine('  Convertis chaque ligne en decimal, ADDITIONNE le tout.', 'warning');
-  addLine('  COMMANDE A TAPER :  sum <total>', 'info');
-  addLine('  (exemple : sum 123)', 'dim');
+  addLine('  COMMANDE : sum <total>', 'info');
   stage = 'game3';
   promptEl.textContent = 'hacker@vault:~$';
   showInput();
 }
 
-async function finalReveal(){
+async function finalHackSuccess(){
   hideInput();
-  addLine('', '');
-  await glitchBurst(10, 50);
-  addLine('', '');
-  await typeLine('[CRITIQUE] Acces au coffre-fort principal accorde...', 'warning', 14);
-  await sleep(400);
-  await typeLine('[SYSTEME] Decryptage du code final en cours...', 'info', 14);
+  await glitchBurst(8, 50);
+  await typeLine('[CRITIQUE] Acces manager Fleeca obtenu...', 'warning', 14);
+  await sleep(300);
+  await typeLine('[SYSTEME] Redirection vers l\'application Fleeca...', 'info', 14);
   await sleep(500);
-  for (const p of [10,25,40,55,70,85,100]){
-    addLine('[SYSTEME] Progression : '+p+'%  '+'#'.repeat(Math.floor(p/5)), 'info');
-    if (p === 55) await glitchBurst(3, 50);
-    await sleep(250);
+  for (const p of [25,50,75,100]){
+    addLine('[REDIRECT] '+p+'%  '+'#'.repeat(Math.floor(p/5)), 'info');
+    await sleep(200);
   }
   await sleep(400);
-  addLine('[SYSTEME] CODE DECRYPTE AVEC SUCCES', 'success');
-  addLine('', '');
-  await sleep(300);
-  addHTML(`<pre class="ascii-art success big">
-   +============================================+
-   |                                            |
-   |    A C C E S   A U T O R I S E             |
-   |    Coffre-fort principal OUVERT            |
-   |                                            |
-   |          +----------------------+          |
-   |          |   C O D E :  2 9 4 1 |          |
-   |          +----------------------+          |
-   |                                            |
-   |    STATUT : MISSION REUSSIE                |
-   |    TEMPS  : INDETECTABLE                   |
-   |    TRACE  : EFFACEE                        |
-   |                                            |
-   +============================================+
-  </pre>`);
-  await sleep(300);
-  await typeLine('Bravo hacker ! Tu as resolu les 3 epreuves.', 'success', 14);
-  await typeLine('>>>  LE CODE FINAL EST  :  2 9 4 1  <<<', 'success', 18);
-  addLine('', '');
-  addLine('Tape "restart" pour rejouer la mission.', 'warning');
-  stage = 'done';
-  promptEl.textContent = 'root@darknet:~$';
-  showInput();
+  addLine('[SYSTEME] Une derniere etape t\'attend dans l\'app...', 'success');
+  await sleep(800);
+  // Transition back to phone
+  beep(1500, 0.2, 'sine', 0.05);
+  await glitchTransition();
+  document.getElementById('terminal-overlay').classList.remove('show');
+  document.getElementById('matrix-bg').classList.remove('show');
+  document.getElementById('phone').style.display = 'block';
+  showScreen('fleeca-admin');
 }
 
 async function handleCommand(raw){
   const cmd = raw.trim();
-  addLine(promptEl.textContent + ' ' + cmd, '');
+  addLine(promptEl.textContent + ' ' + cmd);
   const c = cmd.toLowerCase();
   if (!c) { showInput(); return; }
 
   if (stage === 'menu'){
     if (c === 'help'){
-      addLine('Commandes disponibles :', 'info');
-      addLine('  start    - commencer la mission', 'info');
-      addLine('  help     - afficher cette aide', 'info');
-      addLine('  clear    - effacer l\'ecran', 'info');
-      addLine('  whoami   - identite actuelle', 'info');
-    } else if (c === 'start'){
-      await startGame1();
-      return;
-    } else if (c === 'clear'){
-      output.innerHTML = '';
-    } else if (c === 'whoami'){
-      addLine('hacker_anonyme_42 | rang: SCRIPT_KIDDIE | ip: spoofed', 'success');
-    } else {
-      addLine('Commande inconnue : '+cmd, 'error');
-      addLine('Tape "help" pour la liste.', 'warning');
-    }
+      addLine('Commandes :', 'info');
+      addLine('  start  - commencer la mission', 'info');
+      addLine('  clear  - effacer l\'ecran', 'info');
+      addLine('  whoami - identite', 'info');
+    } else if (c === 'start'){ await startGame1(); return; }
+    else if (c === 'clear'){ output.innerHTML = ''; }
+    else if (c === 'whoami'){ addLine('hacker_anonyme_42 | ip: spoofed', 'success'); }
+    else { addLine('Commande inconnue : '+cmd, 'error'); addLine('Tape "help".', 'warning'); }
   }
   else if (stage === 'game1'){
     if (c === 'help'){
       addLine('Tape : decrypt <mot>', 'info');
-      addLine('Decale chaque lettre de KDFN de -3 dans l\'alphabet.', 'info');
-      addLine('K->H,  D->A,  F->C,  K->H', 'dim');
-    } else if (c.startsWith('decrypt ')){
+      addLine('Decale chaque lettre de KDFN de -3', 'info');
+      addLine('K->H, D->A, F->C, K->H', 'dim');
+    } else if (c === 'clear'){ output.innerHTML = ''; }
+    else if (c.startsWith('decrypt ')){
       const ans = c.split(/\s+/)[1] || '';
       if (ans === 'hack'){
-        await glitchBurst(2, 60);
+        beep(880, 0.15, 'sine', 0.05);
+        await glitchBurst(2, 50);
         addLine('[ OK ] Decryptage reussi : KDFN -> HACK', 'success');
-        addLine('[ OK ] Message decrypte : "HACK"', 'success');
-        await sleep(500);
+        await sleep(400);
         await startGame2();
         return;
       } else {
+        beep(200, 0.1, 'sawtooth', 0.04);
         addLine('[ ERR ] Mauvais decryptage : "'+ans+'"', 'error');
-        addLine('Indice : K(-3)=H ... continue avec D, F, K', 'warning');
+        addLine('Indice : K(-3)=H', 'warning');
       }
-    } else if (c === 'clear'){
-      output.innerHTML = '';
-    } else {
-      addLine('Commande inconnue. Utilise : decrypt <mot>', 'error');
-    }
+    } else { addLine('Commande inconnue. Utilise : decrypt <mot>', 'error'); }
   }
   else if (stage === 'game2'){
     const seq = ['scan','connect','bypass','inject'];
     const step = state.g2;
     if (c === 'help'){
-      addLine('Sequence a respecter : scan -> connect -> bypass -> inject', 'info');
-      addLine('Etape actuelle : '+step+'/4 -> tape "'+seq[step-1]+'"', 'info');
-    } else if (c === 'clear'){
-      output.innerHTML = '';
-    } else if (c === seq[step-1]){
+      addLine('Sequence : scan -> connect -> bypass -> inject', 'info');
+      addLine('Etape '+step+'/4 -> tape "'+seq[step-1]+'"', 'info');
+    } else if (c === 'clear'){ output.innerHTML = ''; }
+    else if (c === seq[step-1]){
+      beep(700+step*100, 0.08, 'sine', 0.04);
       if (step === 1){
-        addLine('[ SCAN ] Lancement nmap...', 'success');
-        addLine('[ SCAN ] Ports ouverts trouves : 22, 80, 443, 8080, 31337', 'success');
+        addLine('[SCAN] nmap lance...', 'success');
+        addLine('[SCAN] Ports ouverts : 22, 80, 443, 8080, 31337', 'success');
         addLine('>>> ETAPE 2/4 - tape "connect"', 'warning');
       } else if (step === 2){
-        addLine('[CONNECT] Connexion au port 31337...', 'success');
+        addLine('[CONNECT] Port 31337 ouvert', 'success');
         addLine('[CONNECT] Reverse shell etabli !', 'success');
         addLine('>>> ETAPE 3/4 - tape "bypass"', 'warning');
       } else if (step === 3){
-        addLine('[BYPASS] Exploitation faille CVE-2024-XX42...', 'success');
-        addLine('[BYPASS] Firewall contourne, IDS desactive.', 'success');
+        addLine('[BYPASS] Exploitation CVE-2024-XX42...', 'success');
+        addLine('[BYPASS] Firewall contourne, IDS off.', 'success');
         addLine('>>> ETAPE 4/4 - tape "inject"', 'warning');
       } else if (step === 4){
-        addLine('[INJECT] Injection du payload (1024 octets)...', 'success');
-        addLine('[INJECT] Payload accepte par la machine cible !', 'success');
+        addLine('[INJECT] Injection payload (1024 octets)...', 'success');
+        addLine('[INJECT] Payload accepte !', 'success');
         await sleep(400);
         await startGame3();
         return;
       }
       state.g2 = step + 1;
     } else if (seq.includes(c)){
-      await glitchBurst(3, 50);
-      addLine('[ALERTE] Mauvais ordre ! Le firewall t\'a detecte.', 'error');
-      addLine('[ALERTE] Connexion fermee. Retour a l\'etape 1/4.', 'error');
+      beep(200, 0.2, 'sawtooth', 0.05);
+      await glitchBurst(2, 50);
+      addLine('[ALERTE] Mauvais ordre ! Detecte.', 'error');
       addLine('>>> ETAPE 1/4 - tape "scan"', 'warning');
       state.g2 = 1;
-    } else {
-      addLine('Commande inconnue : '+cmd, 'error');
-      addLine('Etape '+state.g2+'/4 attendue : "'+seq[state.g2-1]+'"', 'warning');
-    }
+    } else { addLine('Commande inconnue : '+cmd, 'error'); }
   }
   else if (stage === 'game3'){
     if (c === 'help'){
-      addLine('Convertis chaque cle binaire en decimal :', 'info');
-      addLine('  01010101 = 0+64+0+16+0+4+0+1', 'info');
-      addLine('  00110011 = 0+0+32+16+0+0+2+1', 'info');
-      addLine('  01100110 = 0+64+32+0+0+4+2+0', 'info');
-      addLine('Puis additionne les 3 et tape : sum <total>', 'info');
-    } else if (c === 'clear'){
-      output.innerHTML = '';
-    } else if (c.startsWith('sum ')){
+      addLine('Convertis chaque binaire en decimal :', 'info');
+      addLine('  01010101 = 64+16+4+1', 'info');
+      addLine('  00110011 = 32+16+2+1', 'info');
+      addLine('  01100110 = 64+32+4+2', 'info');
+      addLine('Puis tape : sum <total>', 'info');
+    } else if (c === 'clear'){ output.innerHTML = ''; }
+    else if (c.startsWith('sum ')){
       const ans = parseInt(c.split(/\s+/)[1]);
       if (ans === 238){
+        beep(1200, 0.2, 'sine', 0.05);
         addLine('[ OK ] Calcul correct : 85 + 51 + 102 = 238', 'success');
-        addLine('[ OK ] Acces au coffre-fort autorise...', 'success');
-        await sleep(300);
-        await finalReveal();
+        await sleep(500);
+        await finalHackSuccess();
         return;
       } else if (isNaN(ans)){
-        addLine('[ ERR ] Format invalide. Tape : sum <nombre>', 'error');
+        addLine('[ ERR ] Format invalide. sum <nombre>', 'error');
       } else {
+        beep(200, 0.1, 'sawtooth', 0.04);
         addLine('[ ERR ] Mauvais total : '+ans, 'error');
-        addLine('Recalcule : convertis chaque binaire en decimal puis additionne.', 'warning');
+        addLine('Recalcule.', 'warning');
       }
-    } else {
-      addLine('Commande inconnue. Utilise : sum <total>', 'error');
-    }
+    } else { addLine('Commande inconnue. sum <total>', 'error'); }
   }
-  else if (stage === 'done'){
-    if (c === 'restart'){
-      output.innerHTML = '';
-      state = {};
-      stage = 'boot';
-      await bootSequence();
-      return;
-    } else if (c === 'clear'){
-      output.innerHTML = '';
-    } else {
-      addLine('Mission terminee. Tape "restart" pour rejouer.', 'warning');
-    }
-  }
-
   showInput();
 }
 
@@ -829,18 +1522,162 @@ cmdInput.addEventListener('keydown', async (e) => {
   }
 });
 
+// Fake codes pendant les attentes
 setInterval(()=>{
-  if (stage !== 'boot' && Math.random() < 0.06 && inputLine.style.display === 'flex'){
-    const msg = fakeCodes[Math.floor(Math.random()*fakeCodes.length)];
+  if (stage !== 'boot' && !inputLine.classList.contains('hidden') && Math.random() < 0.05){
     const d = document.createElement('div');
     d.className = 'line dim';
-    d.textContent = msg;
+    d.textContent = fakeCodes[Math.floor(Math.random()*fakeCodes.length)];
     output.insertBefore(d, inputLine);
     scrollDown();
   }
 }, 2500);
 
-document.addEventListener('click', ()=>{ if (inputLine.style.display==='flex') cmdInput.focus(); });
+/* ============================================================
+   BYPASS MINI-JEU FINAL
+============================================================ */
+const BAR_WIDTH = 316; // px utile (380 - padding/border)
+const bypassBar = document.getElementById('bypass-bar');
+const bypassZone = document.getElementById('bypass-zone');
+const bypassIndicator = document.getElementById('bypass-indicator');
+const bypassRoundInfo = document.getElementById('bypass-round-info');
+const bypassStop = document.getElementById('bypass-stop');
+const bypassProgress = document.getElementById('bypass-progress');
+
+let bypassPos = 0, bypassDir = 1, bypassSpeed = 200;
+let bypassZoneStart = 0, bypassZoneWidth = 80;
+let bypassRoundNum = 1;
+let bypassAnim = null, bypassLastT = 0, bypassRunning = false;
+
+const ROUNDS = [
+  { zoneWidth: 90, speed: 240 },
+  { zoneWidth: 65, speed: 320 },
+  { zoneWidth: 42, speed: 430 },
+];
+
+function startBypassGame(){
+  bypassRoundNum = 1;
+  updateBypassDots();
+  showScreen('fleeca-bypass');
+  setTimeout(startBypassRound, 400);
+}
+
+function updateBypassDots(){
+  const dots = bypassProgress.querySelectorAll('.bypass-dot');
+  dots.forEach((d, i) => {
+    d.classList.remove('done','current');
+    if (i < bypassRoundNum - 1) d.classList.add('done');
+    else if (i === bypassRoundNum - 1) d.classList.add('current');
+  });
+}
+
+function startBypassRound(){
+  const W = bypassBar.clientWidth;
+  const cfg = ROUNDS[bypassRoundNum - 1];
+  bypassZoneWidth = cfg.zoneWidth;
+  bypassSpeed = cfg.speed;
+  bypassZoneStart = 20 + Math.random() * (W - 40 - cfg.zoneWidth);
+  bypassZone.style.left = bypassZoneStart + 'px';
+  bypassZone.style.width = bypassZoneWidth + 'px';
+  bypassPos = 0; bypassDir = 1;
+  bypassRunning = true;
+  bypassLastT = performance.now();
+  bypassRoundInfo.textContent = 'MANCHE '+bypassRoundNum+' / 3';
+  updateBypassDots();
+  requestAnimationFrame(animBypass);
+}
+
+function animBypass(t){
+  if (!bypassRunning) return;
+  const W = bypassBar.clientWidth;
+  const dt = (t - bypassLastT) / 1000;
+  bypassLastT = t;
+  bypassPos += bypassDir * bypassSpeed * dt;
+  if (bypassPos > W){ bypassPos = W; bypassDir = -1; }
+  if (bypassPos < 0){ bypassPos = 0; bypassDir = 1; }
+  bypassIndicator.style.left = bypassPos + 'px';
+  bypassAnim = requestAnimationFrame(animBypass);
+}
+
+bypassStop.addEventListener('click', () => {
+  if (!bypassRunning) return;
+  bypassRunning = false;
+  cancelAnimationFrame(bypassAnim);
+  const inZone = bypassPos >= bypassZoneStart && bypassPos <= bypassZoneStart + bypassZoneWidth;
+  if (inZone){
+    beep(1000 + bypassRoundNum*200, 0.15, 'sine', 0.05);
+    bypassIndicator.style.background = '#22c55e';
+    bypassIndicator.style.boxShadow = '0 0 14px #22c55e';
+    if (bypassRoundNum >= 3){
+      setTimeout(showVaultCode, 700);
+    } else {
+      bypassRoundNum++;
+      setTimeout(()=>{
+        bypassIndicator.style.background = '#ef4444';
+        bypassIndicator.style.boxShadow = '0 0 10px #ef4444, 0 0 20px rgba(239,68,68,0.5)';
+        startBypassRound();
+      }, 600);
+    }
+  } else {
+    triggerAlarm();
+  }
+});
+
+function showVaultCode(){
+  const t = new Date();
+  document.querySelector('#success-time span').textContent =
+    String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0')+':'+String(t.getSeconds()).padStart(2,'0');
+  showScreen('fleeca-success');
+  beep(523, 0.15, 'sine', 0.05);
+  setTimeout(()=>beep(659, 0.15, 'sine', 0.05), 150);
+  setTimeout(()=>beep(784, 0.4, 'sine', 0.05), 300);
+}
+
+/* ============================================================
+   ALARME (game over)
+============================================================ */
+function triggerAlarm(){
+  alarmSiren();
+  const al = document.getElementById('alarm-screen');
+  al.classList.add('show');
+  const cd = document.getElementById('alarm-countdown');
+  let n = 3;
+  cd.textContent = 'RESET DANS '+n+'...';
+  const iv = setInterval(()=>{
+    n--;
+    if (n <= 0){
+      clearInterval(iv);
+      al.classList.remove('show');
+      resetAll();
+    } else {
+      cd.textContent = 'RESET DANS '+n+'...';
+    }
+  }, 1000);
+}
+
+/* ============================================================
+   RESET COMPLET
+============================================================ */
+function resetAll(){
+  state = {};
+  stage = 'boot';
+  output.innerHTML = '';
+  document.getElementById('terminal-overlay').classList.remove('show');
+  document.getElementById('matrix-bg').classList.remove('show');
+  document.getElementById('intro-screen').classList.remove('show');
+  document.getElementById('phone').style.display = 'block';
+  bypassIndicator.style.background = '#ef4444';
+  bypassIndicator.style.boxShadow = '0 0 10px #ef4444, 0 0 20px rgba(239,68,68,0.5)';
+  showScreen('home-screen');
+}
+
+// Click anywhere on terminal area focuses input
+document.addEventListener('click', (e) => {
+  if (document.getElementById('terminal-overlay').classList.contains('show') &&
+      !inputLine.classList.contains('hidden')){
+    cmdInput.focus();
+  }
+});
 </script>
 </body>
 </html>
