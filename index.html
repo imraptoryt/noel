@@ -339,27 +339,37 @@
     text-align: center;
     font-size: 16px;
     font-weight: 600;
+    padding: 0 12px;
   }
   .window-controls {
-    position: absolute;
-    right: 14px;
-    bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    margin-left: auto;
   }
   .window-controls button[data-action="min"],
   .window-controls button[data-action="max"] { display: none; }
   .window-controls button[data-action="close"] {
-    width: 30px; height: 30px;
+    width: 34px; height: 34px;
     border-radius: 50%;
-    background: rgba(120,120,128,0.16);
+    background: rgba(120,120,128,0.18);
     border: none;
     color: #000;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
     padding: 0;
     cursor: pointer;
     margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
   }
-  .window-controls button[data-action="close"]:active { background: rgba(120,120,128,0.3); }
+  .window-controls button[data-action="close"]:active {
+    background: rgba(120,120,128,0.35);
+    transform: scale(0.92);
+  }
 
   .window-body {
     flex: 1;
@@ -377,8 +387,11 @@
     border-bottom: 1px solid #500;
   }
   .darknet-window .window-controls button[data-action="close"] {
-    background: rgba(255,80,80,0.15);
-    color: #ff8080;
+    background: rgba(255,80,80,0.18);
+    color: #ff9090;
+  }
+  .darknet-window .window-controls button[data-action="close"]:active {
+    background: rgba(255,80,80,0.35);
   }
   .darknet-window .window-body {
     background: #000 !important;
