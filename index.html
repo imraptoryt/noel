@@ -2,1682 +2,1171 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>FLEECA BANK - Mobile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LSCUSTOM — Internal Database</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;600;700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body {
-  height: 100%;
-  background: #0a0e14;
-  font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
-  color: #fff;
-  overflow: hidden;
-  user-select: none;
+:root{
+  --bg:#0a0b0e;--surface:#111318;--surface2:#181b22;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --accent:#e8c94a;--accent2:#c9a32a;
+  --red:#e84a4a;--green:#4ae89a;--blue:#4a9ae8;--purple:#a44ae8;
+  --muted:#555b70;--text:#e8eaf2;--text2:#8a90a8;
+  --mono:'Share Tech Mono',monospace;--sans:'Barlow',sans-serif;--cond:'Barlow Condensed',sans-serif;
 }
-body {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: radial-gradient(ellipse at center, #0d1117 0%, #050709 80%);
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:1000;}
+
+header{border-bottom:1px solid var(--border2);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;background:rgba(10,11,14,0.97);backdrop-filter:blur(12px);z-index:200;}
+.logo{display:flex;align-items:center;gap:14px;}
+.logo-badge{width:38px;height:38px;background:var(--accent);display:flex;align-items:center;justify-content:center;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);}
+.logo-badge span{font-family:var(--cond);font-weight:900;font-size:13px;color:#000;letter-spacing:-0.5px;}
+.logo-text{font-family:var(--cond);font-weight:900;font-size:22px;letter-spacing:3px;}
+.logo-text span{color:var(--accent);}
+.header-right{display:flex;align-items:center;gap:1.5rem;}
+.weekly-total{display:flex;flex-direction:column;align-items:flex-end;background:rgba(232,201,74,0.06);border:1px solid rgba(232,201,74,0.2);padding:6px 16px;}
+.wtl{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+.wtv{font-family:var(--cond);font-weight:900;font-size:20px;color:var(--accent);line-height:1;margin-top:2px;}
+.header-status{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--green);}
+.header-status::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+nav{border-bottom:1px solid var(--border);padding:0 2rem;display:flex;background:var(--surface);overflow-x:auto;}
+.tab{padding:14px 22px;font-family:var(--mono);font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;display:flex;align-items:center;gap:8px;user-select:none;border:none;background:none;white-space:nowrap;}
+.tab:hover{color:var(--text);background:rgba(255,255,255,0.03);}
+.tab.active{color:var(--accent);border-bottom:2px solid var(--accent);background:rgba(232,201,74,0.05);}
+.tab.locked{color:var(--red);}
+.tab.locked.active{border-bottom-color:var(--red);background:rgba(232,74,74,0.05);}
+.tab.secret{color:var(--purple);display:none;}
+.tab.secret.visible{display:flex;}
+.tab.secret.active{border-bottom-color:var(--purple);background:rgba(164,74,232,0.05);}
+
+main{padding:2rem;max-width:1200px;margin:0 auto;}
+.panel{display:none;animation:fadeIn 0.3s ease;}
+.panel.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+.section-header{display:flex;align-items:baseline;gap:16px;margin-bottom:2rem;flex-wrap:wrap;}
+.section-title{font-family:var(--cond);font-weight:900;font-size:32px;letter-spacing:2px;text-transform:uppercase;}
+.section-sub{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:1px;}
+
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:2rem;}
+.stat-card{background:var(--surface);padding:1.5rem;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);opacity:0.5;}
+.stat-card.green::before{background:var(--green);}
+.stat-card.red::before{background:var(--red);}
+.stat-card.blue::before{background:var(--blue);}
+.stat-card.purple::before{background:var(--purple);}
+.stat-label{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.stat-value{font-family:var(--cond);font-weight:900;font-size:36px;line-height:1;}
+.stat-value.accent{color:var(--accent);}
+.stat-value.green{color:var(--green);}
+.stat-value.red{color:var(--red);}
+.stat-value.purple{color:var(--purple);}
+.stat-delta{font-family:var(--mono);font-size:11px;color:var(--green);margin-top:6px;}
+.stat-delta.neg{color:var(--red);}
+.stat-delta.muted{color:var(--text2);}
+
+.chart-section{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem;}
+.chart-box{background:var(--surface);border:1px solid var(--border);padding:1.5rem;}
+.chart-title{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:1.2rem;}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.bar-label{font-family:var(--mono);font-size:11px;color:var(--text2);width:70px;flex-shrink:0;text-align:right;}
+.bar-track{flex:1;height:8px;background:rgba(255,255,255,0.05);}
+.bar-fill{height:100%;background:var(--accent);}
+.bar-fill.green{background:var(--green);}
+.bar-fill.blue{background:var(--blue);}
+.bar-fill.red{background:var(--red);}
+.bar-fill.purple{background:var(--purple);}
+.bar-val{font-family:var(--mono);font-size:11px;color:var(--text2);width:60px;flex-shrink:0;}
+
+.table-box{background:var(--surface);border:1px solid var(--border);margin-bottom:2rem;}
+.table-header-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 120px;padding:10px 1.5rem;border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02);}
+.th{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+.table-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 120px;padding:12px 1.5rem;border-bottom:1px solid var(--border);align-items:center;transition:background 0.15s;}
+.table-row:last-child{border-bottom:none;}
+.table-row:hover{background:rgba(255,255,255,0.02);}
+.td{font-size:13px;color:var(--text2);}
+.td.highlight{color:var(--text);font-weight:600;}
+.status-badge{display:inline-block;padding:3px 10px;font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;}
+.status-badge.done{color:var(--green);border:1px solid rgba(74,232,154,0.3);background:rgba(74,232,154,0.05);}
+.status-badge.pending{color:var(--accent);border:1px solid rgba(232,201,74,0.3);background:rgba(232,201,74,0.05);}
+.status-badge.cancelled{color:var(--red);border:1px solid rgba(232,74,74,0.3);background:rgba(232,74,74,0.05);}
+.status-badge.danger{color:var(--red);border:1px solid rgba(232,74,74,0.4);background:rgba(232,74,74,0.1);}
+
+.rank-section{margin-bottom:2.5rem;}
+.rank-label{font-family:var(--mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;display:flex;align-items:center;gap:12px;}
+.rank-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.employee-cards{display:flex;flex-wrap:wrap;gap:10px;}
+.emp-card{background:var(--surface);border:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;gap:12px;min-width:220px;transition:all 0.2s;cursor:pointer;}
+.emp-card:hover{border-color:var(--border2);background:var(--surface2);transform:translateY(-1px);}
+.emp-card:hover .emp-name{color:var(--accent);}
+.emp-card.pdg{border-left:3px solid var(--accent);}
+.emp-card.copdg{border-left:3px solid var(--accent2);}
+.emp-card.drh{border-left:3px solid var(--blue);}
+.emp-card.chef{border-left:3px solid var(--green);}
+.emp-card.cdi{border-left:3px solid #7a7aff;}
+.emp-card.cdd{border-left:3px solid var(--muted);}
+.emp-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--cond);font-weight:700;font-size:13px;flex-shrink:0;}
+.emp-avatar.gold{background:rgba(232,201,74,0.15);color:var(--accent);}
+.emp-avatar.blue{background:rgba(74,154,232,0.15);color:var(--blue);}
+.emp-avatar.green{background:rgba(74,232,154,0.15);color:var(--green);}
+.emp-avatar.purple{background:rgba(122,122,255,0.15);color:#7a7aff;}
+.emp-avatar.gray{background:rgba(85,91,112,0.2);color:var(--muted);}
+.emp-name{font-size:14px;font-weight:600;color:var(--text);line-height:1.2;transition:color 0.2s;}
+.emp-role{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;margin-top:2px;}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;align-items:center;justify-content:center;padding:2rem;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border2);width:620px;max-width:95vw;max-height:90vh;overflow-y:auto;animation:fadeIn 0.2s ease;}
+.modal-header{padding:1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;justify-content:space-between;}
+.modal-identity{display:flex;align-items:center;gap:16px;flex:1;}
+.modal-avatar{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--cond);font-weight:700;font-size:20px;flex-shrink:0;}
+.modal-name{font-family:var(--cond);font-weight:900;font-size:22px;letter-spacing:1px;line-height:1.1;}
+.modal-role-badge{font-family:var(--mono);font-size:10px;letter-spacing:2px;padding:3px 10px;display:inline-block;margin-top:6px;}
+.modal-close{background:none;border:1px solid var(--border2);color:var(--text2);width:32px;height:32px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.modal-close:hover{border-color:var(--red);color:var(--red);}
+.modal-body{padding:1.5rem;}
+.modal-section{margin-bottom:1.5rem;}
+.modal-section-title{font-family:var(--mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.modal-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);gap:12px;}
+.modal-row:last-child{border-bottom:none;}
+.modal-key{font-family:var(--mono);font-size:11px;color:var(--text2);}
+.modal-val{font-size:13px;font-weight:600;color:var(--text);text-align:right;}
+.modal-val.green{color:var(--green);}
+.modal-val.accent{color:var(--accent);}
+.modal-val.red{color:var(--red);}
+.sales-bar-row{margin-bottom:10px;}
+.sales-bar-label{font-family:var(--mono);font-size:11px;color:var(--text2);margin-bottom:4px;display:flex;justify-content:space-between;}
+.sales-bar-track{height:6px;background:rgba(255,255,255,0.05);}
+.sales-bar-fill{height:100%;background:var(--accent);}
+
+.lock-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:1.5rem;text-align:center;}
+.lock-icon-big{width:80px;height:80px;background:rgba(232,74,74,0.08);border:1px solid rgba(232,74,74,0.2);display:flex;align-items:center;justify-content:center;font-size:36px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);}
+.lock-title{font-family:var(--cond);font-weight:900;font-size:28px;letter-spacing:3px;text-transform:uppercase;}
+.lock-sub{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:1px;margin-top:4px;}
+.code-hint{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:1px;}
+.code-input-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+.code-digit{width:44px;height:56px;background:var(--surface);border:1px solid var(--border2);text-align:center;font-family:var(--mono);font-size:22px;color:var(--accent);outline:none;transition:border-color 0.2s;caret-color:var(--accent);}
+.code-digit:focus{border-color:var(--accent);background:rgba(232,201,74,0.05);}
+.code-digit.error{border-color:var(--red);background:rgba(232,74,74,0.05);color:var(--red);}
+.unlock-btn{padding:14px 40px;background:var(--accent);color:#000;border:none;font-family:var(--cond);font-weight:700;font-size:16px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;}
+.unlock-btn:hover{opacity:0.85;}
+.code-error-msg{font-family:var(--mono);font-size:12px;color:var(--red);letter-spacing:1px;min-height:20px;}
+
+.finance-content{display:none;}
+.finance-content.visible{display:block;}
+.finance-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem;margin-bottom:2rem;}
+.finance-card{background:var(--surface);border:1px solid var(--border);padding:2rem;position:relative;overflow:hidden;}
+.finance-label{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.finance-amount{font-family:var(--cond);font-weight:900;font-size:40px;color:var(--accent);line-height:1;}
+.finance-unit{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:4px;}
+.week-breakdown{background:var(--surface);border:1px solid var(--border);padding:1.5rem;margin-bottom:2rem;}
+.breakdown-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.breakdown-row:last-child{border-bottom:none;}
+.breakdown-day{color:var(--text2);font-family:var(--mono);font-size:12px;}
+.breakdown-amount{color:var(--text);font-weight:600;}
+.breakdown-amount.total{color:var(--accent);font-family:var(--cond);font-size:20px;font-weight:900;}
+
+.section-divider{font-family:var(--mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin:2rem 0 1rem;display:flex;align-items:center;gap:12px;}
+.section-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.section-divider.purple{color:var(--purple);opacity:0.85;}
+.section-divider.purple::after{background:rgba(164,74,232,0.2);}
+
+.bank-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem;}
+.bank-card{background:var(--surface);border:1px solid var(--border);padding:1.5rem;}
+.bank-card.highlight-card{border-color:rgba(232,201,74,0.3);}
+.bank-title{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;}
+.bank-row{display:flex;flex-direction:column;gap:2px;margin-bottom:12px;}
+.bank-row:last-child{margin-bottom:0;}
+.bank-key{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;}
+.bank-val{font-family:var(--mono);font-size:14px;color:var(--text);word-break:break-all;}
+.bank-val.accent{color:var(--accent);}
+.bank-val.green{color:var(--green);}
+.bank-val.red{color:var(--red);}
+.redacted{background:var(--muted);color:var(--muted);border-radius:2px;cursor:pointer;user-select:none;transition:all 0.3s;display:inline-block;padding:0 4px;}
+.redacted:hover{opacity:0.7;}
+.redacted.revealed{background:transparent;color:var(--accent);padding:0;}
+.reveal-hint{font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:6px;letter-spacing:1px;}
+
+.secret-warning{background:rgba(164,74,232,0.05);border:1px solid rgba(164,74,232,0.25);padding:1rem 1.5rem;margin-bottom:2rem;display:flex;align-items:center;gap:14px;}
+.secret-warning-icon{font-size:22px;flex-shrink:0;}
+.secret-warning-text{font-family:var(--mono);font-size:11px;color:rgba(164,74,232,0.85);letter-spacing:1px;line-height:1.7;}
+
+.illegal-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem;}
+.illegal-card{background:var(--surface);border:1px solid rgba(164,74,232,0.2);padding:1.5rem;}
+.illegal-card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:1rem;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.illegal-car-name{font-family:var(--cond);font-weight:900;font-size:20px;color:var(--text);line-height:1.1;}
+.illegal-car-sub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:4px;}
+.illegal-plate{font-family:var(--mono);font-size:12px;color:var(--purple);background:rgba(164,74,232,0.1);border:1px solid rgba(164,74,232,0.2);padding:3px 8px;letter-spacing:2px;flex-shrink:0;}
+.illegal-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;gap:10px;}
+.illegal-row:last-child{border-bottom:none;}
+.illegal-key{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;flex-shrink:0;}
+.illegal-val{color:var(--text2);text-align:right;font-size:12px;}
+.illegal-val.danger{color:var(--red);}
+.illegal-val.money{color:var(--green);font-family:var(--mono);}
+.illegal-val.purple{color:var(--purple);}
+.mods-list{margin-top:10px;}
+.mods-label{font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:6px;letter-spacing:1px;}
+.mod-tag{display:inline-block;font-family:var(--mono);font-size:10px;color:var(--red);background:rgba(232,74,74,0.08);border:1px solid rgba(232,74,74,0.2);padding:3px 8px;margin:2px 2px 2px 0;letter-spacing:1px;}
+
+.client-cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-bottom:2rem;}
+.client-card{background:var(--surface);border:1px solid rgba(164,74,232,0.15);padding:1.5rem;}
+.client-name{font-family:var(--cond);font-weight:900;font-size:18px;margin-bottom:4px;}
+.client-alias{font-family:var(--mono);font-size:11px;color:var(--purple);letter-spacing:1px;margin-bottom:12px;}
+.heat-bar-wrap{margin-top:12px;}
+.heat-label{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;display:flex;justify-content:space-between;}
+.heat-track{height:6px;background:rgba(255,255,255,0.05);}
+.heat-fill{height:100%;}
+
+footer{border-top:1px solid var(--border);padding:1.5rem 2rem;display:flex;justify-content:space-between;align-items:center;margin-top:4rem;flex-wrap:wrap;gap:1rem;}
+.footer-text{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1.5px;}
+
+@media(max-width:700px){
+  .chart-section,.bank-grid,.illegal-grid{grid-template-columns:1fr;}
+  .code-digit{width:32px;height:46px;font-size:18px;}
+  .weekly-total{display:none;}
+  header{padding:0 1rem;}
+  main{padding:1rem;}
+  .table-header-row,.table-row{grid-template-columns:1fr 1fr 1fr;}
+  .th:nth-child(4),.td:nth-child(4){display:none;}
 }
 
-/* ============= PHONE FRAME ============= */
-#phone {
-  width: 380px;
-  height: 760px;
-  background: #111;
-  border-radius: 44px;
-  padding: 12px;
-  box-shadow: 0 0 60px rgba(0,255,80,0.08), 0 0 0 2px #1a1a1a, inset 0 0 0 1px #2a2a2a;
-  position: relative;
-  z-index: 5;
-}
-#phone-screen {
-  width: 100%;
-  height: 100%;
-  background: #000;
-  border-radius: 34px;
-  overflow: hidden;
-  position: relative;
-}
-.notch {
-  position: absolute;
-  top: 0; left: 50%;
-  transform: translateX(-50%);
-  width: 130px; height: 22px;
-  background: #111;
-  border-radius: 0 0 18px 18px;
-  z-index: 100;
-}
-.status-bar {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 30px;
-  padding: 6px 22px 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
-  font-weight: 600;
-  color: #fff;
-  z-index: 50;
-}
-.status-bar .right { display: flex; gap: 6px; font-size: 12px; }
+/* MINIGAME OVERLAYS */
+.mg-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:600;align-items:center;justify-content:center;padding:1rem;}
+.mg-overlay.open{display:flex;}
+.mg-modal{background:var(--surface);border:1px solid var(--border2);width:520px;max-width:95vw;padding:1.8rem;animation:fadeIn 0.2s ease;}
+.mg-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;}
+.mg-title{font-family:var(--cond);font-weight:900;font-size:22px;letter-spacing:2px;text-transform:uppercase;}
+.mg-close{background:none;border:1px solid var(--border2);color:var(--text2);width:30px;height:30px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.mg-close:hover{border-color:var(--red);color:var(--red);}
+.mg-instruction{font-family:var(--mono);font-size:11px;color:var(--text2);letter-spacing:1px;margin-bottom:1.5rem;line-height:1.6;}
+.mg-status{font-family:var(--mono);font-size:12px;color:var(--accent);margin-top:1rem;text-align:center;letter-spacing:1px;min-height:18px;}
+.mg-progress{display:flex;justify-content:center;gap:8px;margin-top:1rem;}
+.mg-progress-dot{width:14px;height:14px;border:1px solid var(--border2);border-radius:50%;}
+.mg-progress-dot.filled{background:var(--green);border-color:var(--green);box-shadow:0 0 6px rgba(74,232,154,0.6);}
 
-.screen {
-  position: absolute;
-  inset: 0;
-  padding-top: 36px;
-  display: none;
-  flex-direction: column;
-}
-.screen.active { display: flex; }
+/* WIRE GAME */
+.wire-game{display:flex;justify-content:space-between;gap:2rem;padding:1rem 0;}
+.wire-col{display:flex;flex-direction:column;gap:12px;flex:1;}
+.wire-pin{padding:10px 14px;border:2px solid;font-family:var(--mono);font-size:12px;letter-spacing:1px;cursor:pointer;background:var(--surface2);text-align:center;transition:all 0.15s;user-select:none;}
+.wire-pin.socket{font-size:18px;}
+.wire-pin:hover{transform:scale(1.04);}
+.wire-pin.selected{box-shadow:0 0 0 2px currentColor inset;background:rgba(255,255,255,0.05);}
+.wire-pin.connected{background:rgba(74,232,154,0.1) !important;border-color:var(--green) !important;color:var(--green) !important;cursor:default;}
+.wire-pin.error{background:rgba(232,74,74,0.2) !important;animation:shake 0.3s;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
 
-/* ============= HOME SCREEN ============= */
-#home-screen {
-  background:
-    radial-gradient(circle at 20% 20%, rgba(16,185,129,0.12), transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(59,130,246,0.10), transparent 50%),
-    linear-gradient(180deg, #1a2332 0%, #0a0e14 100%);
-}
-.home-time {
-  text-align: center;
-  font-size: 64px;
-  font-weight: 200;
-  letter-spacing: -2px;
-  margin-top: 18px;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.5);
-}
-.home-date {
-  text-align: center;
-  font-size: 13px;
-  font-weight: 500;
-  color: #cbd5e1;
-  margin-top: -4px;
-  margin-bottom: 22px;
-}
-.app-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px 0;
-  padding: 0 18px;
-}
-.app {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-  transition: transform 0.1s;
-}
-.app:active { transform: scale(0.9); }
-.app-icon {
-  width: 56px; height: 56px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 30px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-}
-.app-name {
-  font-size: 11px;
-  color: #fff;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-}
-/* app colors */
-.bg-blue   { background: linear-gradient(135deg, #2563eb, #1e40af); }
-.bg-green  { background: linear-gradient(135deg, #10b981, #047857); }
-.bg-purple { background: linear-gradient(135deg, #a855f7, #6d28d9); }
-.bg-pink   { background: linear-gradient(135deg, #ec4899, #be185d); }
-.bg-orange { background: linear-gradient(135deg, #f97316, #c2410c); }
-.bg-yellow { background: linear-gradient(135deg, #eab308, #a16207); }
-.bg-red    { background: linear-gradient(135deg, #ef4444, #b91c1c); }
-.bg-gray   { background: linear-gradient(135deg, #64748b, #334155); }
-.bg-teal   { background: linear-gradient(135deg, #14b8a6, #0f766e); }
-.bg-dark   { background: linear-gradient(135deg, #1e293b, #0f172a); }
-.bg-fleeca {
-  background: linear-gradient(135deg, #16a34a, #064e2c);
-  box-shadow: 0 0 18px rgba(22,163,74,0.5), 0 4px 10px rgba(0,0,0,0.4);
-  position: relative;
-}
-.bg-fleeca::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 14px;
-  border: 1.5px solid rgba(34,197,94,0.6);
-  animation: fleecaPulse 2s infinite;
-}
-@keyframes fleecaPulse {
-  0%,100% { box-shadow: inset 0 0 0 1px rgba(34,197,94,0.4); }
-  50%     { box-shadow: inset 0 0 10px rgba(34,197,94,0.8); }
-}
-.dock {
-  margin-top: auto;
-  padding: 0 18px 22px;
-  display: flex;
-  justify-content: space-around;
-}
+/* PAINT GAME */
+.paint-target-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:1.5rem;}
+.paint-target{width:140px;height:80px;border:2px solid var(--border2);transition:background 0.3s;}
+.paint-target-name{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:1px;}
+.paint-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.paint-btn{height:60px;border:2px solid var(--border2);cursor:pointer;transition:all 0.15s;}
+.paint-btn:hover{transform:scale(1.05);border-color:var(--accent);}
+.paint-btn:active{transform:scale(0.96);}
 
-/* ============= APP POPUP ============= */
-#app-popup {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.75);
-  z-index: 200;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(6px);
-}
-#app-popup.show { display: flex; }
-.popup-box {
-  width: 80%;
-  background: #1c2330;
-  border-radius: 14px;
-  padding: 22px 18px 14px;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-}
-.popup-icon { font-size: 38px; margin-bottom: 10px; }
-.popup-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
-.popup-text { font-size: 13px; color: #cbd5e1; line-height: 1.4; margin-bottom: 14px; }
-.popup-btn {
-  display: block;
-  width: 100%;
-  background: #2563eb;
-  color: #fff;
-  border: none;
-  padding: 10px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.popup-btn:hover { background: #1d4ed8; }
+/* ENGINE GAME */
+.engine-gauge-wrap{padding:1rem 0;}
+.engine-rpm{font-family:var(--cond);font-weight:900;font-size:32px;color:var(--accent);text-align:center;margin-bottom:1rem;letter-spacing:3px;}
+.engine-gauge{position:relative;height:42px;background:var(--surface2);border:1px solid var(--border2);overflow:hidden;}
+.engine-zone{position:absolute;top:0;bottom:0;left:42%;width:18%;background:rgba(74,232,154,0.18);border-left:1px solid rgba(74,232,154,0.5);border-right:1px solid rgba(74,232,154,0.5);}
+.engine-needle{position:absolute;top:0;bottom:0;width:3px;background:var(--red);left:0%;box-shadow:0 0 8px var(--red);}
+.engine-labels{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:1px;}
+.engine-btn{display:block;width:100%;padding:14px;background:var(--red);color:#fff;border:none;font-family:var(--cond);font-weight:900;font-size:18px;letter-spacing:4px;text-transform:uppercase;cursor:pointer;margin-top:1.5rem;transition:all 0.15s;}
+.engine-btn:hover{opacity:0.9;}
+.engine-btn:active{transform:scale(0.98);}
 
-/* ============= FLEECA LOGIN ============= */
-#fleeca-login, #fleeca-admin, #fleeca-bypass, #fleeca-success {
-  background: linear-gradient(180deg, #0a1f12 0%, #050d08 100%);
-  padding: 50px 24px 24px;
-}
-.fleeca-header {
-  text-align: center;
-  margin-bottom: 28px;
-}
-.fleeca-logo {
-  font-size: 30px;
-  font-weight: 800;
-  letter-spacing: 4px;
-  color: #22c55e;
-  text-shadow: 0 0 14px rgba(34,197,94,0.5);
-  margin-bottom: 4px;
-}
-.fleeca-tag {
-  font-size: 10px;
-  color: #4ade80;
-  letter-spacing: 3px;
-  opacity: 0.7;
-}
-.fleeca-welcome {
-  text-align: center;
-  font-size: 13px;
-  color: #cbd5e1;
-  margin-bottom: 22px;
-}
-.fleeca-field {
-  background: #0f1f15;
-  border: 1px solid #1f3a28;
-  border-radius: 10px;
-  padding: 12px 14px;
-  margin-bottom: 10px;
-  font-size: 12px;
-  color: #94a3b8;
-}
-.fleeca-field .label { font-size: 9px; letter-spacing: 2px; color: #64748b; }
-.fleeca-field .val { color: #e2e8f0; font-weight: 600; margin-top: 2px; }
-.fleeca-btn {
-  display: block;
-  width: 100%;
-  margin-top: 14px;
-  padding: 14px;
-  border: none;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.fleeca-btn.primary {
-  background: #16a34a;
-  color: #fff;
-}
-.fleeca-btn.primary:hover { background: #15803d; }
-.fleeca-btn.locked {
-  background: #1f293a;
-  color: #475569;
-  cursor: not-allowed;
-}
-.fleeca-btn.danger {
-  background: linear-gradient(135deg, #dc2626, #991b1b);
-  color: #fff;
-  position: relative;
-  overflow: hidden;
-}
-.fleeca-btn.danger::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: repeating-linear-gradient(45deg, transparent 0 8px, rgba(255,255,255,0.06) 8px 16px);
-}
-.fleeca-btn.danger:hover { filter: brightness(1.15); }
-.fleeca-footer-warning {
-  margin-top: 14px;
-  padding: 10px;
-  background: rgba(239,68,68,0.08);
-  border: 1px solid rgba(239,68,68,0.3);
-  border-radius: 8px;
-  font-size: 10px;
-  color: #fca5a5;
-  text-align: center;
-  letter-spacing: 1px;
-}
-.fleeca-back {
-  position: absolute;
-  top: 40px; left: 14px;
-  background: transparent;
-  border: none;
-  color: #4ade80;
-  font-size: 18px;
-  cursor: pointer;
-  padding: 4px 8px;
-}
-
-/* ============= FLEECA ADMIN ============= */
-.admin-banner {
-  background: linear-gradient(90deg, #dc2626, #991b1b);
-  color: #fff;
-  text-align: center;
-  padding: 8px;
-  font-size: 11px;
-  letter-spacing: 2px;
-  font-weight: 700;
-  border-radius: 8px;
-  margin-bottom: 14px;
-  animation: warnBlink 1.5s infinite;
-}
-@keyframes warnBlink {
-  0%,100% { opacity: 1; }
-  50%     { opacity: 0.5; }
-}
-.admin-stat {
-  background: #0f1f15;
-  border: 1px solid #1f3a28;
-  border-radius: 8px;
-  padding: 10px 12px;
-  margin-bottom: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 11px;
-}
-.admin-stat .lbl { color: #94a3b8; }
-.admin-stat .val { color: #4ade80; font-weight: 700; }
-
-/* ============= BYPASS MINI-JEU ============= */
-#fleeca-bypass .bypass-title {
-  text-align: center;
-  font-size: 16px;
-  font-weight: 700;
-  color: #ef4444;
-  letter-spacing: 3px;
-  text-shadow: 0 0 10px rgba(239,68,68,0.5);
-  margin-bottom: 6px;
-}
-.bypass-sub {
-  text-align: center;
-  font-size: 10px;
-  color: #94a3b8;
-  letter-spacing: 2px;
-  margin-bottom: 18px;
-}
-.bypass-round-info {
-  text-align: center;
-  font-size: 12px;
-  color: #4ade80;
-  margin-bottom: 14px;
-  font-weight: 600;
-}
-.bypass-bar-container {
-  background: #0a1208;
-  border: 2px solid #1f3a28;
-  border-radius: 8px;
-  padding: 8px;
-  margin-bottom: 18px;
-  position: relative;
-  height: 60px;
-}
-.bypass-bar {
-  position: relative;
-  height: 100%;
-  background:
-    repeating-linear-gradient(90deg, #16201a 0 8px, #0f1812 8px 16px);
-  border-radius: 4px;
-  overflow: hidden;
-}
-.bypass-zone {
-  position: absolute;
-  top: 0; bottom: 0;
-  background: linear-gradient(180deg, rgba(34,197,94,0.6), rgba(34,197,94,0.3));
-  border-left: 2px solid #22c55e;
-  border-right: 2px solid #22c55e;
-  box-shadow: 0 0 10px rgba(34,197,94,0.6);
-}
-.bypass-indicator {
-  position: absolute;
-  top: -4px; bottom: -4px;
-  width: 4px;
-  background: #ef4444;
-  box-shadow: 0 0 10px #ef4444, 0 0 20px rgba(239,68,68,0.5);
-  transform: translateX(-2px);
-}
-.bypass-instructions {
-  text-align: center;
-  font-size: 11px;
-  color: #94a3b8;
-  margin-bottom: 14px;
-  line-height: 1.5;
-}
-.bypass-stop {
-  display: block;
-  width: 100%;
-  padding: 16px;
-  background: linear-gradient(135deg, #dc2626, #991b1b);
-  border: 2px solid #ef4444;
-  color: #fff;
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: 6px;
-  border-radius: 10px;
-  cursor: pointer;
-  box-shadow: 0 0 20px rgba(220,38,38,0.4);
-}
-.bypass-stop:hover { filter: brightness(1.15); }
-.bypass-stop:active { transform: scale(0.97); }
-.bypass-progress {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 14px;
-}
-.bypass-dot {
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  background: #1f293a;
-  border: 1px solid #334155;
-}
-.bypass-dot.done { background: #22c55e; border-color: #16a34a; box-shadow: 0 0 8px #22c55e; }
-.bypass-dot.current { background: #fbbf24; border-color: #f59e0b; animation: warnBlink 1s infinite; }
-
-/* ============= FLEECA SUCCESS ============= */
-#fleeca-success { background: linear-gradient(180deg, #052e1a 0%, #050d08 100%); }
-.vault-icon {
-  font-size: 64px;
-  text-align: center;
-  margin: 20px 0;
-  animation: vaultGlow 2s infinite;
-}
-@keyframes vaultGlow {
-  0%,100% { filter: drop-shadow(0 0 10px #22c55e); }
-  50%     { filter: drop-shadow(0 0 25px #22c55e); }
-}
-.success-title {
-  text-align: center;
-  font-size: 14px;
-  font-weight: 700;
-  color: #22c55e;
-  letter-spacing: 2px;
-  margin-bottom: 8px;
-}
-.success-sub {
-  text-align: center;
-  font-size: 10px;
-  color: #4ade80;
-  letter-spacing: 3px;
-  opacity: 0.8;
-  margin-bottom: 22px;
-}
-.code-box {
-  background: #0a1f12;
-  border: 2px solid #22c55e;
-  border-radius: 12px;
-  padding: 22px 14px;
-  text-align: center;
-  box-shadow: 0 0 30px rgba(34,197,94,0.3), inset 0 0 20px rgba(34,197,94,0.05);
-  margin: 0 6px;
-}
-.code-box .lbl {
-  font-size: 10px;
-  color: #94a3b8;
-  letter-spacing: 4px;
-  margin-bottom: 12px;
-}
-.code-digits {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-}
-.code-digit {
-  width: 50px; height: 64px;
-  background: #022912;
-  border: 1.5px solid #16a34a;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 34px;
-  font-weight: 800;
-  color: #22c55e;
-  text-shadow: 0 0 12px #22c55e;
-  font-family: 'Courier New', monospace;
-}
-.success-time {
-  text-align: center;
-  font-size: 11px;
-  color: #94a3b8;
-  margin-top: 16px;
-  font-family: 'Courier New', monospace;
-}
-
-/* ============= INTRO SAHP (overlay fullscreen) ============= */
-#intro-screen {
-  position: fixed;
-  inset: 0;
-  z-index: 20;
-  background: radial-gradient(ellipse at center, #0a1929 0%, #050b14 70%, #02050a 100%);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Courier New', monospace;
-  transition: opacity 0.6s;
-}
-#intro-screen.show { display: flex; }
-#intro-screen.hide { opacity: 0; pointer-events: none; }
-.sahp-panel {
-  width: min(680px, 94vw);
-  background: #0a1929;
-  border: 2px solid #00d0ff;
-  border-radius: 8px;
-  padding: 22px 26px;
-  box-shadow: 0 0 30px rgba(0,208,255,0.35);
-  position: relative;
-}
-.sahp-panel::before, .sahp-panel::after {
-  content:''; position:absolute; left:0; right:0; height:6px;
-  background: repeating-linear-gradient(45deg, #fbbf24 0 8px, #0a1929 8px 16px);
-}
-.sahp-panel::before { top:-2px; border-radius: 6px 6px 0 0; }
-.sahp-panel::after { bottom:-2px; border-radius: 0 0 6px 6px; }
-.sahp-title {
-  text-align: center;
-  color: #00d0ff;
-  font-size: 22px;
-  font-weight: bold;
-  letter-spacing: 4px;
-  text-shadow: 0 0 12px #00d0ff;
-  margin: 8px 0 4px;
-}
-.sahp-subtitle {
-  text-align: center;
-  color: #94a3b8;
-  font-size: 11px;
-  letter-spacing: 3px;
-  margin-bottom: 18px;
-}
-.sahp-timer-row {
-  display: flex; justify-content: space-between; align-items: center;
-  font-size: 11px; letter-spacing: 2px; color: #94a3b8;
-  margin-bottom: 4px;
-}
-.sahp-timer-bar {
-  height: 3px; background: #1e293b;
-  border-radius: 2px; overflow: hidden;
-  margin-bottom: 18px;
-}
-.sahp-timer-fill {
-  height: 100%; width: 100%;
-  background: linear-gradient(90deg, #00d0ff, #38bdf8);
-  box-shadow: 0 0 8px #00d0ff;
-  transition: width 0.1s linear;
-}
-.sahp-target {
-  background: #0f1f33;
-  border: 1px solid #1e3a5f;
-  border-radius: 6px;
-  padding: 14px 18px;
-  margin-bottom: 16px;
-}
-.sahp-target-label {
-  text-align: center; color: #94a3b8;
-  font-size: 10px; letter-spacing: 4px;
-  margin-bottom: 10px;
-}
-.sahp-target-cells {
-  display: flex; justify-content: center; align-items: center;
-  gap: 8px; flex-wrap: wrap;
-}
-.sahp-target-cell {
-  width: 60px; padding: 10px 0;
-  text-align: center;
-  background: #0a1929;
-  border: 1px solid #1e3a5f;
-  border-radius: 4px;
-  font-size: 16px;
-  color: #cbd5e1; font-weight: bold;
-  transition: all 0.2s;
-}
-.sahp-target-cell.active {
-  border-color: #00d0ff;
-  background: #0c2540;
-  box-shadow: 0 0 10px rgba(0,208,255,0.6);
-  color: #00d0ff;
-  text-shadow: 0 0 8px #00d0ff;
-}
-.sahp-target-cell.done {
-  border-color: #16a34a;
-  background: #052e1a;
-  color: #16a34a;
-}
-.sahp-arrow { color: #475569; font-size: 16px; }
-.sahp-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-.sahp-cell {
-  background: #0f1f33;
-  border: 1px solid #1e3a5f;
-  border-radius: 4px;
-  padding: 14px 0;
-  text-align: center;
-  font-size: 17px; font-weight: bold;
-  color: #cbd5e1;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.sahp-cell:hover {
-  background: #1a3050;
-  border-color: #00d0ff;
-  color: #00d0ff;
-}
-.sahp-cell.found {
-  background: #052e1a;
-  border-color: #16a34a;
-  color: #16a34a;
-  pointer-events: none;
-}
-.sahp-cell.wrong { animation: shakeRed 0.4s; }
-.sahp-status {
-  text-align: center; margin-top: 14px;
-  font-size: 12px; letter-spacing: 2px;
-  color: #94a3b8; min-height: 18px;
-}
-.sahp-status.fail { color: #ef4444; text-shadow: 0 0 8px #ef4444; }
-.sahp-status.win  { color: #16a34a; text-shadow: 0 0 8px #16a34a; }
-@keyframes shakeRed {
-  0%,100% { background:#0f1f33; border-color:#1e3a5f; color:#cbd5e1; transform:translateX(0);}
-  25%     { background:#3b0a0a; border-color:#ef4444; color:#ef4444; transform:translateX(-4px);}
-  75%     { background:#3b0a0a; border-color:#ef4444; color:#ef4444; transform:translateX(4px);}
-}
-
-/* ============= TERMINAL (overlay fullscreen) ============= */
-#matrix-bg {
-  position: fixed; top:0; left:0;
-  width:100%; height:100%;
-  z-index: 15; opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.5s;
-}
-#matrix-bg.show { opacity: 0.15; }
-#terminal-overlay {
-  position: fixed; inset: 0;
-  z-index: 18;
-  background: #000;
-  display: none;
-  transition: opacity 0.6s;
-}
-#terminal-overlay.show { display: block; }
-#terminal-overlay.hide { opacity: 0; pointer-events: none; }
-#terminal {
-  height: 100%; overflow-y: auto;
-  padding: 18px;
-  color: #00ff41;
-  font-family: 'Courier New', monospace;
-  text-shadow: 0 0 5px #00ff41;
-  font-size: 15px;
-  line-height: 1.35;
-}
-.line { margin: 1px 0; white-space: pre-wrap; word-wrap: break-word; }
-.line.error   { color: #ff2640; text-shadow: 0 0 5px #ff2640; }
-.line.warning { color: #ffaa00; text-shadow: 0 0 5px #ffaa00; }
-.line.info    { color: #00d0ff; text-shadow: 0 0 5px #00d0ff; }
-.line.success { color: #00ff41; }
-.line.dim     { opacity: 0.45; }
-.line.big     { font-size: 18px; font-weight: bold; }
-.glitch { animation: glitch 0.25s steps(2) infinite; display: inline-block; }
-@keyframes glitch {
-  0%   { transform: translate(0,0); }
-  25%  { transform: translate(-2px,1px); text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff; }
-  50%  { transform: translate(2px,-1px); text-shadow: -2px 0 #ff00ff, 2px 0 #00ffff; }
-  75%  { transform: translate(-1px,-2px); }
-  100% { transform: translate(0,0); }
-}
-#input-line { display: flex; align-items: center; padding: 4px 0; }
-#input-line.hidden { display: none; }
-#prompt { margin-right: 8px; color: #00ff41; white-space: nowrap; }
-#cmd-input {
-  background: transparent; border: none;
-  color: #00ff41;
-  font-family: 'Courier New', monospace;
-  font-size: 15px; flex: 1; outline: none;
-  text-shadow: 0 0 5px #00ff41;
-  caret-color: #00ff41;
-}
-.ascii-art {
-  color: #00ff41; font-size: 10px; line-height: 11px;
-  margin: 4px 0; white-space: pre;
-}
-.box { color: #00d0ff; text-shadow: 0 0 5px #00d0ff; font-weight: bold; }
-#terminal::-webkit-scrollbar { width: 8px; }
-#terminal::-webkit-scrollbar-track { background: #001a05; }
-#terminal::-webkit-scrollbar-thumb { background: #00ff41; }
-
-/* ============= ALARM SCREEN ============= */
-#alarm-screen {
-  position: fixed; inset: 0;
-  z-index: 50;
-  background: #000;
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  animation: alarmFlash 0.4s infinite;
-}
-#alarm-screen.show { display: flex; }
-@keyframes alarmFlash {
-  0%,49%   { background: #b91c1c; }
-  50%,100% { background: #000; }
-}
-.alarm-icon {
-  font-size: 80px;
-  animation: shake 0.15s infinite;
-}
-@keyframes shake {
-  0%,100% { transform: translate(0,0); }
-  25%     { transform: translate(-4px,4px); }
-  75%     { transform: translate(4px,-4px); }
-}
-.alarm-title {
-  font-size: 36px;
-  font-weight: 900;
-  letter-spacing: 4px;
-  color: #fff;
-  text-shadow: 0 0 20px #ef4444, 0 0 40px #ef4444;
-  margin-top: 10px;
-}
-.alarm-sub {
-  font-size: 16px;
-  color: #fef2f2;
-  margin-top: 12px;
-  letter-spacing: 3px;
-  text-align: center;
-  padding: 0 20px;
-}
-.alarm-countdown {
-  margin-top: 24px;
-  font-size: 14px;
-  color: #fca5a5;
-  letter-spacing: 4px;
-}
-
-/* glitch transition */
-#glitch-overlay {
-  position: fixed; inset: 0;
-  z-index: 100;
-  background: #000;
-  display: none;
-  pointer-events: none;
-}
-#glitch-overlay.show {
-  display: block;
-  animation: globalGlitch 0.6s steps(8);
-}
-@keyframes globalGlitch {
-  0%   { background: #000; opacity: 0; }
-  10%  { background: #00ff41; opacity: 0.5; }
-  20%  { background: #ff00ff; opacity: 0.3; }
-  30%  { background: #000; opacity: 0.8; }
-  40%  { background: #00ffff; opacity: 0.4; }
-  60%  { background: #000; opacity: 1; }
-  100% { background: #000; opacity: 0; }
-}
+/* LOCKED ILLEGAL CONTENT */
+.illegal-locked-banner{background:rgba(164,74,232,0.05);border:1px solid rgba(164,74,232,0.3);padding:1rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+.illegal-locked-text{font-family:var(--mono);font-size:11px;color:rgba(164,74,232,0.9);letter-spacing:1px;line-height:1.7;flex:1;min-width:200px;}
+.mg-trigger-btn{padding:10px 22px;background:var(--purple);color:#fff;border:none;font-family:var(--cond);font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;flex-shrink:0;transition:opacity 0.15s;}
+.mg-trigger-btn:hover{opacity:0.85;}
+.illegal-locked .illegal-card > *:not(.illegal-card-header){filter:blur(6px);user-select:none;pointer-events:none;transition:filter 0.5s;}
 </style>
 </head>
 <body>
 
-<!-- ============= MATRIX BG ============= -->
-<canvas id="matrix-bg"></canvas>
+<header>
+  <div class="logo">
+    <div class="logo-badge"><span>LSC</span></div>
+    <div class="logo-text">LS<span>CUSTOM</span></div>
+  </div>
+  <div class="header-right">
+    <div class="weekly-total">
+      <div class="wtl">Recettes semaine</div>
+      <div class="wtv">$4 875 250</div>
+    </div>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--muted);" id="clock">—</div>
+    <div class="header-status">SYSTÈME EN LIGNE</div>
+  </div>
+</header>
 
-<!-- ============= PHONE ============= -->
-<div id="phone">
-  <div id="phone-screen">
-    <div class="notch"></div>
-    <div class="status-bar">
-      <span id="status-time">14:37</span>
-      <span class="right">📶 5G 🔋87%</span>
+<nav>
+  <button class="tab active" onclick="switchTab('dashboard')">⬡ Dashboard</button>
+  <button class="tab" onclick="switchTab('employees')">⬡ Employés</button>
+  <button class="tab" onclick="switchTab('services')">⬡ Services</button>
+  <button class="tab locked" onclick="switchTab('finances')">🔒 Finances</button>
+  <button class="tab secret" id="tab-secret" onclick="switchTab('secret')">☠ Dossiers Noirs</button>
+</nav>
+
+<main>
+
+<!-- DASHBOARD -->
+<div class="panel active" id="panel-dashboard">
+  <div class="section-header">
+    <div class="section-title">Dashboard</div>
+    <div class="section-sub">// SEMAINE EN COURS — S19 / 2025</div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-label">Recettes semaine</div><div class="stat-value accent">$4 875 250</div><div class="stat-delta">↑ +18% vs S18</div></div>
+    <div class="stat-card"><div class="stat-label">Véhicules traités</div><div class="stat-value accent">312</div><div class="stat-delta">↑ +12%</div></div>
+    <div class="stat-card green"><div class="stat-label">Satisfaction client</div><div class="stat-value green">98.4%</div><div class="stat-delta">↑ +0.7pts</div></div>
+    <div class="stat-card"><div class="stat-label">Commandes actives</div><div class="stat-value">42</div><div class="stat-delta muted">— stable</div></div>
+    <div class="stat-card blue"><div class="stat-label">Employés actifs</div><div class="stat-value" style="color:var(--blue)">22</div><div class="stat-delta muted">— effectif complet</div></div>
+    <div class="stat-card red"><div class="stat-label">Incidents signalés</div><div class="stat-value red">2</div><div class="stat-delta neg">↑ +1</div></div>
+  </div>
+  <div class="chart-section">
+    <div class="chart-box">
+      <div class="chart-title">// Interventions par type</div>
+      <div class="bar-row"><div class="bar-label">Carrosserie</div><div class="bar-track"><div class="bar-fill" style="width:82%"></div></div><div class="bar-val">82 unités</div></div>
+      <div class="bar-row"><div class="bar-label">Moteur</div><div class="bar-track"><div class="bar-fill green" style="width:64%"></div></div><div class="bar-val">64 unités</div></div>
+      <div class="bar-row"><div class="bar-label">Peinture</div><div class="bar-track"><div class="bar-fill blue" style="width:55%"></div></div><div class="bar-val">55 unités</div></div>
+      <div class="bar-row"><div class="bar-label">Tuning</div><div class="bar-track"><div class="bar-fill" style="width:46%"></div></div><div class="bar-val">46 unités</div></div>
+      <div class="bar-row"><div class="bar-label">Revente</div><div class="bar-track"><div class="bar-fill red" style="width:18%"></div></div><div class="bar-val">18 unités</div></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">// Activité journalière</div>
+      <div class="bar-row"><div class="bar-label">Lundi</div><div class="bar-track"><div class="bar-fill blue" style="width:70%"></div></div><div class="bar-val">70%</div></div>
+      <div class="bar-row"><div class="bar-label">Mardi</div><div class="bar-track"><div class="bar-fill blue" style="width:85%"></div></div><div class="bar-val">85%</div></div>
+      <div class="bar-row"><div class="bar-label">Mercredi</div><div class="bar-track"><div class="bar-fill blue" style="width:60%"></div></div><div class="bar-val">60%</div></div>
+      <div class="bar-row"><div class="bar-label">Jeudi</div><div class="bar-track"><div class="bar-fill blue" style="width:95%"></div></div><div class="bar-val">95%</div></div>
+      <div class="bar-row"><div class="bar-label">Vendredi</div><div class="bar-track"><div class="bar-fill blue" style="width:78%"></div></div><div class="bar-val">78%</div></div>
+      <div class="bar-row"><div class="bar-label">Samedi</div><div class="bar-track"><div class="bar-fill green" style="width:100%"></div></div><div class="bar-val">RECORD</div></div>
+    </div>
+  </div>
+  <div class="table-box">
+    <div class="table-header-row">
+      <div class="th">Client</div><div class="th">Véhicule</div><div class="th">Service</div><div class="th">Technicien</div><div class="th">Statut</div>
+    </div>
+    <div class="table-row"><div class="td highlight">T. Mendoza</div><div class="td">Elegy RH8</div><div class="td">Peinture + Carrosserie</div><div class="td">Diego S.</div><div class="td"><span class="status-badge done">Terminé</span></div></div>
+    <div class="table-row"><div class="td highlight">M. Kowalski</div><div class="td">Infernus Classic</div><div class="td">Révision moteur</div><div class="td">Jack M.</div><div class="td"><span class="status-badge pending">En cours</span></div></div>
+    <div class="table-row"><div class="td highlight">S. Ortega</div><div class="td">Sultan RS</div><div class="td">Tuning complet</div><div class="td">Liza D.</div><div class="td"><span class="status-badge done">Terminé</span></div></div>
+    <div class="table-row"><div class="td highlight">K. Petrov</div><div class="td">Entity XXR</div><div class="td">Rembourrage + Toit</div><div class="td">Roy K.</div><div class="td"><span class="status-badge pending">En cours</span></div></div>
+    <div class="table-row"><div class="td highlight">J. Fontaine</div><div class="td">Banshee 900R</div><div class="td">Carrosserie sport</div><div class="td">Marlon S.</div><div class="td"><span class="status-badge cancelled">Annulé</span></div></div>
+  </div>
+</div>
+
+<!-- EMPLOYEES -->
+<div class="panel" id="panel-employees">
+  <div class="section-header">
+    <div class="section-title">Employés</div>
+    <div class="section-sub">// 22 MEMBRES — CLIQUER POUR LE PROFIL DÉTAILLÉ</div>
+  </div>
+
+  <div class="rank-section">
+    <div class="rank-label">PDG — Présidente Directrice Générale</div>
+    <div class="employee-cards">
+      <div class="emp-card pdg" onclick="openModal('zoe-connor')"><div class="emp-avatar gold">ZC</div><div><div class="emp-name">Zoé Connor</div><div class="emp-role">PDG</div></div></div>
+    </div>
+  </div>
+
+  <div class="rank-section">
+    <div class="rank-label">Co-PDG</div>
+    <div class="employee-cards">
+      <div class="emp-card copdg" onclick="openModal('issac-croover')"><div class="emp-avatar gold">IC</div><div><div class="emp-name">Issac Croover</div><div class="emp-role">Co-PDG</div></div></div>
+    </div>
+  </div>
+
+  <div class="rank-section">
+    <div class="rank-label">DRH — Direction des Ressources Humaines</div>
+    <div class="employee-cards">
+      <div class="emp-card drh" onclick="openModal('antonio-spart')"><div class="emp-avatar blue">AS</div><div><div class="emp-name">Antonio Spart</div><div class="emp-role">DRH</div></div></div>
+      <div class="emp-card drh" onclick="openModal('nash-dawkins')"><div class="emp-avatar blue">ND</div><div><div class="emp-name">Nash Dawkins</div><div class="emp-role">DRH</div></div></div>
+    </div>
+  </div>
+
+  <div class="rank-section">
+    <div class="rank-label">Chef d'équipe</div>
+    <div class="employee-cards">
+      <div class="emp-card chef" onclick="openModal('lucas-plaque')"><div class="emp-avatar green">LP</div><div><div class="emp-name">Lucas Plaque</div><div class="emp-role">Chef d'équipe</div></div></div>
+    </div>
+  </div>
+
+  <div class="rank-section">
+    <div class="rank-label">CDI — Contrat à Durée Indéterminée</div>
+    <div class="employee-cards">
+      <div class="emp-card cdi" onclick="openModal('diego-sanshez')"><div class="emp-avatar purple">DS</div><div><div class="emp-name">Diego Sanshez</div><div class="emp-role">CDI</div></div></div>
+      <div class="emp-card cdi" onclick="openModal('jack-mericine')"><div class="emp-avatar purple">JM</div><div><div class="emp-name">Jack Mericine</div><div class="emp-role">CDI</div></div></div>
+      <div class="emp-card cdi" onclick="openModal('liza-devil')"><div class="emp-avatar purple">LD</div><div><div class="emp-name">Liza Devil</div><div class="emp-role">CDI</div></div></div>
+      <div class="emp-card cdi" onclick="openModal('marlon-smith')"><div class="emp-avatar purple">MS</div><div><div class="emp-name">Marlon Smith</div><div class="emp-role">CDI</div></div></div>
+      <div class="emp-card cdi" onclick="openModal('roy-koenigsegg')"><div class="emp-avatar purple">RK</div><div><div class="emp-name">Roy Koenigsegg</div><div class="emp-role">CDI</div></div></div>
+      <div class="emp-card cdi" onclick="openModal('sophia-portmann')"><div class="emp-avatar purple">SP</div><div><div class="emp-name">Sophia Portmann</div><div class="emp-role">CDI</div></div></div>
+      <div class="emp-card cdi" onclick="openModal('tao-ska')"><div class="emp-avatar purple">TS</div><div><div class="emp-name">Tao Ska</div><div class="emp-role">CDI</div></div></div>
+      <div class="emp-card cdi" onclick="openModal('thomas-jones')"><div class="emp-avatar purple">TJ</div><div><div class="emp-name">Thomas Jones</div><div class="emp-role">CDI</div></div></div>
+      <div class="emp-card cdi" onclick="openModal('zay-foncesca')"><div class="emp-avatar purple">ZF</div><div><div class="emp-name">Zay Foncesca V. de C. Vásquez</div><div class="emp-role">CDI</div></div></div>
+    </div>
+  </div>
+
+  <div class="rank-section">
+    <div class="rank-label">CDD — Contrat à Durée Déterminée</div>
+    <div class="employee-cards">
+      <div class="emp-card cdd" onclick="openModal('alessio-mendez')"><div class="emp-avatar gray">AM</div><div><div class="emp-name">Alessio Mendez</div><div class="emp-role">CDD</div></div></div>
+      <div class="emp-card cdd" onclick="openModal('alvaro-martinez')"><div class="emp-avatar gray">AM</div><div><div class="emp-name">Alvaro Martinez</div><div class="emp-role">CDD</div></div></div>
+      <div class="emp-card cdd" onclick="openModal('diego-hernandez')"><div class="emp-avatar gray">DH</div><div><div class="emp-name">Diego Hernandez</div><div class="emp-role">CDD</div></div></div>
+      <div class="emp-card cdd" onclick="openModal('fernando-baca')"><div class="emp-avatar gray">FB</div><div><div class="emp-name">Fernando Baca</div><div class="emp-role">CDD</div></div></div>
+      <div class="emp-card cdd" onclick="openModal('gusto-silva')"><div class="emp-avatar gray">GS</div><div><div class="emp-name">Gusto Silva</div><div class="emp-role">CDD</div></div></div>
+      <div class="emp-card cdd" onclick="openModal('kash-salvatore')"><div class="emp-avatar gray">KS</div><div><div class="emp-name">Kash Salvatore</div><div class="emp-role">CDD</div></div></div>
+      <div class="emp-card cdd" onclick="openModal('paco-valdez')"><div class="emp-avatar gray">PV</div><div><div class="emp-name">Paco Valdez</div><div class="emp-role">CDD</div></div></div>
+      <div class="emp-card cdd" onclick="openModal('pepe-garcia')"><div class="emp-avatar gray">PG</div><div><div class="emp-name">Pepe Garcia</div><div class="emp-role">CDD</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<div class="panel" id="panel-services">
+  <div class="section-header">
+    <div class="section-title">Services</div>
+    <div class="section-sub">// CATALOGUE COMPLET — TARIFS EN VIGUEUR</div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-label">Services standard</div><div class="stat-value accent">8</div></div>
+    <div class="stat-card green"><div class="stat-label">+ Populaire</div><div class="stat-value" style="font-size:18px;color:var(--green)">Réparation Complète</div></div>
+    <div class="stat-card"><div class="stat-label">Délai moyen</div><div class="stat-value">2.4j</div></div>
+    <div class="stat-card blue"><div class="stat-label">Note moyenne</div><div class="stat-value" style="color:var(--blue)">4.9★</div></div>
+  </div>
+
+  <div class="section-divider">Services standard — tarifs fixes</div>
+  <div class="table-box">
+    <div class="table-header-row" style="grid-template-columns:2fr 1fr 1fr 100px;">
+      <div class="th">Service</div><div class="th">Catégorie</div><div class="th">Prix</div><div class="th">Dispo</div>
+    </div>
+    <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 100px;"><div class="td highlight">Carrosserie</div><div class="td">Réparation</div><div class="td">$50</div><div class="td"><span class="status-badge done">Ouvert</span></div></div>
+    <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 100px;"><div class="td highlight">Dépannage</div><div class="td">Mobile</div><div class="td">$50 / km</div><div class="td"><span class="status-badge done">Ouvert</span></div></div>
+    <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 100px;"><div class="td highlight">Fourrière véhicule</div><div class="td">Logistique</div><div class="td">$150</div><div class="td"><span class="status-badge done">Ouvert</span></div></div>
+    <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 100px;"><div class="td highlight">Fourrière bat / avi / héli</div><div class="td">Logistique</div><div class="td">$300</div><div class="td"><span class="status-badge done">Ouvert</span></div></div>
+    <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 100px;"><div class="td highlight">Nettoyage</div><div class="td">Esthétique</div><div class="td">$50</div><div class="td"><span class="status-badge done">Ouvert</span></div></div>
+    <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 100px;"><div class="td highlight">Changement de pneu</div><div class="td">Équipement</div><div class="td">$100</div><div class="td"><span class="status-badge done">Ouvert</span></div></div>
+    <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 100px;"><div class="td highlight">Réparation complète</div><div class="td">Mécanique</div><div class="td">$250</div><div class="td"><span class="status-badge done">Ouvert</span></div></div>
+    <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 100px;"><div class="td highlight">Réparation moteur</div><div class="td">Mécanique</div><div class="td">$200</div><div class="td"><span class="status-badge done">Ouvert</span></div></div>
+  </div>
+
+  <div class="section-divider">Customisations — tarifs sur devis ($10k → $200k)</div>
+  <div class="table-box">
+    <div class="table-header-row" style="grid-template-columns:2fr 1fr 1fr 1fr 100px;">
+      <div class="th">Customisation</div><div class="th">Catégorie</div><div class="th">Prix dès</div><div class="th">Délai</div><div class="th">Dispo</div>
+    </div>
+    <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 100px;"><div class="td highlight">Peinture personnalisée</div><div class="td">Esthétique</div><div class="td">$10 000</div><div class="td">1–2j</div><div class="td"><span class="status-badge done">Ouvert</span></div></div>
+    <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 100px;"><div class="td highlight">Kit carrosserie complet</div><div class="td">Carrosserie</div><div class="td">$25 000</div><div class="td">3–5j</div><div class="td"><span class="status-badge done">Ouvert</span></div></div>
+    <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 100px;"><div class="td highlight">Préparation moteur custom</div><div class="td">Mécanique</div><div class="td">$45 000</div><div class="td">5–7j</div><div class="td"><span class="status-badge done">Ouvert</span></div></div>
+    <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 100px;"><div class="td highlight">Intérieur sur mesure</div><div class="td">Intérieur</div><div class="td">$15 000</div><div class="td">2–3j</div><div class="td"><span class="status-badge done">Ouvert</span></div></div>
+    <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 100px;"><div class="td highlight">Jantes premium & pneus sport</div><div class="td">Équipement</div><div class="td">$12 000</div><div class="td">1j</div><div class="td"><span class="status-badge done">Ouvert</span></div></div>
+    <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 100px;"><div class="td highlight">Tuning complet performance</div><div class="td">Performance</div><div class="td">$80 000</div><div class="td">5–7j</div><div class="td"><span class="status-badge done">Ouvert</span></div></div>
+    <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 100px;"><div class="td highlight">Système son haute gamme</div><div class="td">Multimédia</div><div class="td">$18 000</div><div class="td">2j</div><div class="td"><span class="status-badge done">Ouvert</span></div></div>
+    <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 100px;"><div class="td highlight">Build complet (carrosserie + moteur)</div><div class="td">Premium</div><div class="td">$150 000</div><div class="td">10–14j</div><div class="td"><span class="status-badge pending">Sur RDV</span></div></div>
+    <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 100px;"><div class="td highlight">Custom intégral signature</div><div class="td">Premium</div><div class="td">$200 000</div><div class="td">14–21j</div><div class="td"><span class="status-badge pending">Sur RDV</span></div></div>
+  </div>
+</div>
+
+<!-- FINANCES (LOCKED) -->
+<div class="panel" id="panel-finances">
+  <div class="lock-screen" id="lock-screen">
+    <div class="lock-icon-big">🔒</div>
+    <div>
+      <div class="lock-title">Accès Restreint</div>
+      <div class="lock-sub">// SECTION FINANCES — AUTORISATION REQUISE</div>
+    </div>
+    <div class="code-hint">Code à 10 chiffres = total des recettes de la semaine (visible en haut à droite)</div>
+    <div class="code-input-row" id="digits-row">
+      <input class="code-digit" maxlength="1" type="text" inputmode="numeric">
+      <input class="code-digit" maxlength="1" type="text" inputmode="numeric">
+      <input class="code-digit" maxlength="1" type="text" inputmode="numeric">
+      <input class="code-digit" maxlength="1" type="text" inputmode="numeric">
+      <input class="code-digit" maxlength="1" type="text" inputmode="numeric">
+      <input class="code-digit" maxlength="1" type="text" inputmode="numeric">
+      <input class="code-digit" maxlength="1" type="text" inputmode="numeric">
+      <input class="code-digit" maxlength="1" type="text" inputmode="numeric">
+      <input class="code-digit" maxlength="1" type="text" inputmode="numeric">
+      <input class="code-digit" maxlength="1" type="text" inputmode="numeric">
+    </div>
+    <div class="code-error-msg" id="error-msg"></div>
+    <button class="unlock-btn" onclick="tryUnlock()">DÉVERROUILLER</button>
+  </div>
+
+  <div class="finance-content" id="finance-content">
+    <div class="section-header">
+      <div class="section-title">Finances</div>
+      <div class="section-sub">// DONNÉES CONFIDENTIELLES — S19 / 2025</div>
     </div>
 
-    <!-- HOME SCREEN -->
-    <div id="home-screen" class="screen active">
-      <div class="home-time" id="big-time">14:37</div>
-      <div class="home-date">Jeudi 14 Mai</div>
-      <div class="app-grid">
-        <div class="app" data-app="messages"><div class="app-icon bg-green">💬</div><div class="app-name">Messages</div></div>
-        <div class="app" data-app="photos"><div class="app-icon bg-pink">📷</div><div class="app-name">Photos</div></div>
-        <div class="app" data-app="music"><div class="app-icon bg-red">🎵</div><div class="app-name">Music</div></div>
-        <div class="app" data-app="snake"><div class="app-icon bg-yellow">🐍</div><div class="app-name">Snake</div></div>
-        <div class="app" data-app="weather"><div class="app-icon bg-blue">☁️</div><div class="app-name">Météo</div></div>
-        <div class="app" data-app="food"><div class="app-icon bg-orange">🍔</div><div class="app-name">EatUp</div></div>
-        <div class="app" data-app="casino"><div class="app-icon bg-purple">🎰</div><div class="app-name">Casino</div></div>
-        <div class="app" data-app="calendar"><div class="app-icon bg-teal">📅</div><div class="app-name">Calendar</div></div>
-        <div class="app" data-app="settings"><div class="app-icon bg-gray">⚙️</div><div class="app-name">Réglages</div></div>
-        <div class="app" data-app="browser"><div class="app-icon bg-dark">🌐</div><div class="app-name">Browser</div></div>
-        <div class="app" data-app="game"><div class="app-icon bg-purple">🎮</div><div class="app-name">RagePlay</div></div>
-        <div class="app" data-app="fleeca"><div class="app-icon bg-fleeca">🏦</div><div class="app-name">Fleeca</div></div>
+    <div class="finance-grid">
+      <div class="finance-card"><div class="finance-label">Recettes totales — semaine</div><div class="finance-amount">$4 875 250</div><div class="finance-unit">↑ +18% vs S18</div></div>
+      <div class="finance-card"><div class="finance-label">Charges opérationnelles</div><div class="finance-amount" style="color:var(--red)">$1 218 800</div><div class="finance-unit">25.0% du CA</div></div>
+      <div class="finance-card"><div class="finance-label">Bénéfice net</div><div class="finance-amount" style="color:var(--green)">$3 656 450</div><div class="finance-unit">+18% vs S18</div></div>
+    </div>
+
+    <div class="week-breakdown">
+      <div class="chart-title">// Détail journalier</div>
+      <div class="breakdown-row"><div class="breakdown-day">LUNDI</div><div class="breakdown-amount">$625 400</div></div>
+      <div class="breakdown-row"><div class="breakdown-day">MARDI</div><div class="breakdown-amount">$812 300</div></div>
+      <div class="breakdown-row"><div class="breakdown-day">MERCREDI</div><div class="breakdown-amount">$548 200</div></div>
+      <div class="breakdown-row"><div class="breakdown-day">JEUDI</div><div class="breakdown-amount">$920 800</div></div>
+      <div class="breakdown-row"><div class="breakdown-day">VENDREDI</div><div class="breakdown-amount">$785 600</div></div>
+      <div class="breakdown-row"><div class="breakdown-day">SAMEDI</div><div class="breakdown-amount">$1 182 950</div></div>
+      <div class="breakdown-row" style="margin-top:8px;padding-top:16px;border-top:1px solid var(--border2);"><div class="breakdown-day" style="color:var(--accent);font-weight:600;">TOTAL SEMAINE</div><div class="breakdown-amount total">$4 875 250</div></div>
+    </div>
+
+    <div class="section-divider">Comptes bancaires & accès</div>
+    <div class="bank-grid">
+      <div class="bank-card highlight-card">
+        <div class="bank-title">// Compte Principal — Maze Bank</div>
+        <div class="bank-row"><div class="bank-key">Titulaire</div><div class="bank-val accent">LSCUSTOM ENTERPRISES LLC</div></div>
+        <div class="bank-row"><div class="bank-key">N° de compte</div><div class="bank-val"><span class="redacted" onclick="reveal(this,'4420-1985-7301-8842')">████████████████</span><span class="reveal-hint">cliquer</span></div></div>
+        <div class="bank-row"><div class="bank-key">Code guichet</div><div class="bank-val"><span class="redacted" onclick="reveal(this,'10447')">█████</span></div></div>
+        <div class="bank-row"><div class="bank-key">Mot de passe accès web</div><div class="bank-val"><span class="redacted" onclick="reveal(this,'LSC@maze!2025#')">██████████████</span></div></div>
+        <div class="bank-row"><div class="bank-key">Code PIN carte</div><div class="bank-val"><span class="redacted" onclick="reveal(this,'7749')">████</span></div></div>
+        <div class="bank-row"><div class="bank-key">Solde actuel</div><div class="bank-val green">$24 580 400</div></div>
+      </div>
+
+      <div class="bank-card">
+        <div class="bank-title">// Compte Secondaire — Fleeca Bank</div>
+        <div class="bank-row"><div class="bank-key">Titulaire</div><div class="bank-val">Zoé Connor (perso)</div></div>
+        <div class="bank-row"><div class="bank-key">N° de compte</div><div class="bank-val"><span class="redacted" onclick="reveal(this,'3081-4472-2914')">██████████████</span></div></div>
+        <div class="bank-row"><div class="bank-key">Code guichet</div><div class="bank-val"><span class="redacted" onclick="reveal(this,'21033')">█████</span></div></div>
+        <div class="bank-row"><div class="bank-key">Mot de passe accès web</div><div class="bank-val"><span class="redacted" onclick="reveal(this,'ZoeCnnr_2024')">████████████</span></div></div>
+        <div class="bank-row"><div class="bank-key">Code PIN carte</div><div class="bank-val"><span class="redacted" onclick="reveal(this,'3318')">████</span></div></div>
+        <div class="bank-row"><div class="bank-key">Solde actuel</div><div class="bank-val green">$6 842 100</div></div>
+      </div>
+
+      <div class="bank-card">
+        <div class="bank-title">// Compte Paie — Maze Bank</div>
+        <div class="bank-row"><div class="bank-key">Titulaire</div><div class="bank-val">LSCUSTOM — Service RH</div></div>
+        <div class="bank-row"><div class="bank-key">N° de compte</div><div class="bank-val"><span class="redacted" onclick="reveal(this,'5539-0122-8847')">██████████████</span></div></div>
+        <div class="bank-row"><div class="bank-key">Code guichet</div><div class="bank-val"><span class="redacted" onclick="reveal(this,'60112')">█████</span></div></div>
+        <div class="bank-row"><div class="bank-key">Mot de passe accès web</div><div class="bank-val"><span class="redacted" onclick="reveal(this,'RH-payroll#25')">█████████████</span></div></div>
+        <div class="bank-row"><div class="bank-key">Prochain virement</div><div class="bank-val accent">Lundi S20</div></div>
+        <div class="bank-row"><div class="bank-key">Solde actuel</div><div class="bank-val green">$2 845 200</div></div>
+      </div>
+
+      <div class="bank-card">
+        <div class="bank-title">// Coffre Liquide — Garage Arrière</div>
+        <div class="bank-row"><div class="bank-key">Localisation</div><div class="bank-val">Local B — sous le plancher</div></div>
+        <div class="bank-row"><div class="bank-key">Code coffre</div><div class="bank-val"><span class="redacted" onclick="reveal(this,'47-02-81-19')">███████████</span></div></div>
+        <div class="bank-row"><div class="bank-key">Contenu liquide</div><div class="bank-val green">$1 750 000</div></div>
+        <div class="bank-row"><div class="bank-key">Responsables d'accès</div><div class="bank-val">Z. Connor / I. Croover</div></div>
+        <div class="bank-row"><div class="bank-key">Dernière ouverture</div><div class="bank-val">Jeudi 08/05/2025 — 23:14</div></div>
       </div>
     </div>
 
-    <!-- FLEECA LOGIN -->
-    <div id="fleeca-login" class="screen">
-      <button class="fleeca-back" onclick="goHome()">← Accueil</button>
-      <div class="fleeca-header">
-        <div class="fleeca-logo">FLEECA</div>
-        <div class="fleeca-tag">BANK · SECURE ACCESS</div>
-      </div>
-      <div class="fleeca-welcome">Bienvenue dans votre espace bancaire sécurisé</div>
-      <div class="fleeca-field">
-        <div class="label">UTILISATEUR</div>
-        <div class="val">m.donovan@fleeca.bk</div>
-      </div>
-      <div class="fleeca-field">
-        <div class="label">MOT DE PASSE</div>
-        <div class="val">••••••••••••</div>
-      </div>
-      <button class="fleeca-btn locked">🔒 ACCÈS CLIENT — VERROUILLÉ</button>
-      <button class="fleeca-btn danger" onclick="startHack()">⚠ ACCÈS MANAGER</button>
-      <div class="fleeca-footer-warning">⚠ ACCÈS RÉSERVÉ — TENTATIVE SURVEILLÉE</div>
+    <div class="section-divider">Top vendeurs — semaine</div>
+    <div class="table-box">
+      <div class="table-header-row" style="grid-template-columns:2fr 1fr 1fr 1fr;"><div class="th">Employé</div><div class="th">Ventes</div><div class="th">CA généré</div><div class="th">Commission</div></div>
+      <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr;"><div class="td highlight">Lucas Plaque</div><div class="td">38</div><div class="td" style="color:var(--green)">$458 200</div><div class="td" style="color:var(--accent)">$45 820</div></div>
+      <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr;"><div class="td highlight">Roy Koenigsegg</div><div class="td">31</div><div class="td" style="color:var(--green)">$398 500</div><div class="td" style="color:var(--accent)">$39 850</div></div>
+      <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr;"><div class="td highlight">Sophia Portmann</div><div class="td">27</div><div class="td" style="color:var(--green)">$342 800</div><div class="td" style="color:var(--accent)">$34 280</div></div>
+      <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr;"><div class="td highlight">Jack Mericine</div><div class="td">24</div><div class="td" style="color:var(--green)">$298 600</div><div class="td" style="color:var(--accent)">$29 860</div></div>
+      <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr;"><div class="td highlight">Liza Devil</div><div class="td">22</div><div class="td" style="color:var(--green)">$268 400</div><div class="td" style="color:var(--accent)">$26 840</div></div>
     </div>
 
-    <!-- FLEECA ADMIN (après hack) -->
-    <div id="fleeca-admin" class="screen">
-      <div class="fleeca-header">
-        <div class="fleeca-logo">FLEECA</div>
-        <div class="fleeca-tag">ADMIN · NIVEAU 3</div>
+    <div style="margin-top:1.5rem;text-align:right;">
+      <button onclick="lockFinances()" style="font-family:var(--mono);font-size:11px;color:var(--red);background:none;border:1px solid rgba(232,74,74,0.3);padding:8px 18px;cursor:pointer;letter-spacing:2px;text-transform:uppercase;">🔒 VERROUILLER</button>
+    </div>
+  </div>
+</div>
+
+<!-- SECRET TAB -->
+<div class="panel" id="panel-secret">
+  <div class="section-header">
+    <div class="section-title" style="color:var(--purple);">Dossiers Noirs</div>
+    <div class="section-sub">// ACCÈS ULTRA-RESTREINT — NE PAS IMPRIMER — NE PAS TRANSMETTRE</div>
+  </div>
+
+  <div class="secret-warning">
+    <div class="secret-warning-icon">⚠</div>
+    <div class="secret-warning-text">
+      OPÉRATION FANTÔME — Dossier interne recensant les activités non-déclarées dissimulées sous la couverture légale de LS Custom.<br>
+      Véhicules volés, customisations illégales, réseau de recel. Destruction immédiate en cas d'accès non autorisé.
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card purple"><div class="stat-label">Véhicules volés — actifs</div><div class="stat-value purple">14</div></div>
+    <div class="stat-card purple"><div class="stat-label">Customisations illégales</div><div class="stat-value purple">37</div><div class="stat-delta muted">ce mois</div></div>
+    <div class="stat-card purple"><div class="stat-label">Revenus occultes</div><div class="stat-value purple">$1.2M</div><div class="stat-delta muted">non déclarés</div></div>
+    <div class="stat-card red"><div class="stat-label">Risque LSPD</div><div class="stat-value red">ÉLEVÉ</div></div>
+  </div>
+
+  <div class="section-divider purple">Véhicules volés en stock</div>
+  <div class="illegal-locked-banner" id="illegal-banner">
+    <div class="illegal-locked-text">⚠ DONNÉES CHIFFRÉES — Lance la procédure de correspondance peinture pour révéler les VIN, propriétaires d'origine et valeurs de revente.</div>
+    <button class="mg-trigger-btn" onclick="startPaintGame(unlockIllegalDetails)">🎨 DÉCHIFFRER</button>
+  </div>
+  <div class="illegal-grid illegal-locked" id="illegal-grid">
+
+    <div class="illegal-card">
+      <div class="illegal-card-header">
+        <div><div class="illegal-car-name">Pegassi Zentorno</div><div class="illegal-car-sub">Supercar — 2023</div></div>
+        <div class="illegal-plate">8ZEN-049</div>
       </div>
-      <div class="admin-banner">⚠ ALARME SILENCIEUSE ACTIVE ⚠</div>
-      <div class="admin-stat"><span class="lbl">SOLDE COFFRE PRINCIPAL</span><span class="val">$2,847,392</span></div>
-      <div class="admin-stat"><span class="lbl">COMPTES ACTIFS</span><span class="val">1,247</span></div>
-      <div class="admin-stat"><span class="lbl">DERNIÈRE CONNEXION</span><span class="val">il y a 2 min</span></div>
-      <div class="admin-stat"><span class="lbl">STATUT SÉCURITÉ</span><span class="val" style="color:#ef4444">COMPROMIS</span></div>
-      <button class="fleeca-btn danger" style="margin-top:18px" onclick="startBypassGame()">
-        🔓 BYPASS ALARME — CODE DU JOUR
-      </button>
-      <div class="fleeca-footer-warning">Une seule tentative. Échec = alarme déclenchée.</div>
+      <div class="illegal-row"><div class="illegal-key">VIN d'origine</div><div class="illegal-val">ZEN-2023-447821-X</div></div>
+      <div class="illegal-row"><div class="illegal-key">VIN falsifié</div><div class="illegal-val danger">ZEN-2023-001002-F ⚠</div></div>
+      <div class="illegal-row"><div class="illegal-key">Volé à</div><div class="illegal-val">Rockford Hills — 03/05/25</div></div>
+      <div class="illegal-row"><div class="illegal-key">Propriétaire d'origine</div><div class="illegal-val">M. De Santis (civil)</div></div>
+      <div class="illegal-row"><div class="illegal-key">Valeur marché noir</div><div class="illegal-val money">$320 000</div></div>
+      <div class="illegal-row"><div class="illegal-key">Statut</div><div class="illegal-val danger">En cours de repeinture</div></div>
+      <div class="illegal-row"><div class="illegal-key">Technicien assigné</div><div class="illegal-val purple">Diego Sanshez</div></div>
+      <div class="mods-list">
+        <div class="mods-label">MODS ILLÉGAUX :</div>
+        <span class="mod-tag">Plaque falsifiée</span><span class="mod-tag">GPS retiré</span><span class="mod-tag">VIN regravé</span>
+      </div>
     </div>
 
-    <!-- FLEECA BYPASS GAME -->
-    <div id="fleeca-bypass" class="screen">
-      <div class="bypass-title">BYPASS ALARME</div>
-      <div class="bypass-sub">ARRÊTE LE CURSEUR DANS LA ZONE VERTE</div>
-      <div class="bypass-round-info" id="bypass-round-info">MANCHE 1 / 3</div>
-      <div class="bypass-bar-container">
-        <div class="bypass-bar" id="bypass-bar">
-          <div class="bypass-zone" id="bypass-zone"></div>
-          <div class="bypass-indicator" id="bypass-indicator"></div>
+    <div class="illegal-card">
+      <div class="illegal-card-header">
+        <div><div class="illegal-car-name">Übermacht Sentinel RS</div><div class="illegal-car-sub">Berline sportive — 2024</div></div>
+        <div class="illegal-plate">2SRS-771</div>
+      </div>
+      <div class="illegal-row"><div class="illegal-key">VIN d'origine</div><div class="illegal-val">UBM-2024-882134-A</div></div>
+      <div class="illegal-row"><div class="illegal-key">VIN falsifié</div><div class="illegal-val danger">UBM-2024-003317-F ⚠</div></div>
+      <div class="illegal-row"><div class="illegal-key">Volé à</div><div class="illegal-val">Vinewood — 05/05/25</div></div>
+      <div class="illegal-row"><div class="illegal-key">Propriétaire d'origine</div><div class="illegal-val">K. Ashford (avocat)</div></div>
+      <div class="illegal-row"><div class="illegal-key">Valeur marché noir</div><div class="illegal-val money">$148 000</div></div>
+      <div class="illegal-row"><div class="illegal-key">Statut</div><div class="illegal-val danger">Prêt — attente acheteur</div></div>
+      <div class="illegal-row"><div class="illegal-key">Technicien assigné</div><div class="illegal-val purple">Marlon Smith</div></div>
+      <div class="mods-list">
+        <div class="mods-label">MODS ILLÉGAUX :</div>
+        <span class="mod-tag">Plaque falsifiée</span><span class="mod-tag">Boost non homologué</span><span class="mod-tag">Vitres pare-balles</span>
+      </div>
+    </div>
+
+    <div class="illegal-card">
+      <div class="illegal-card-header">
+        <div><div class="illegal-car-name">Declasse Vigero ZX</div><div class="illegal-car-sub">Muscle car — 2022</div></div>
+        <div class="illegal-plate">5VGZ-330</div>
+      </div>
+      <div class="illegal-row"><div class="illegal-key">VIN d'origine</div><div class="illegal-val">DEC-2022-554490-B</div></div>
+      <div class="illegal-row"><div class="illegal-key">VIN falsifié</div><div class="illegal-val danger">DEC-2022-009944-F ⚠</div></div>
+      <div class="illegal-row"><div class="illegal-key">Volé à</div><div class="illegal-val">Mirror Park — 01/05/25</div></div>
+      <div class="illegal-row"><div class="illegal-key">Propriétaire d'origine</div><div class="illegal-val">T. Brooks (gérant bar)</div></div>
+      <div class="illegal-row"><div class="illegal-key">Valeur marché noir</div><div class="illegal-val money">$95 000</div></div>
+      <div class="illegal-row"><div class="illegal-key">Statut</div><div class="illegal-val" style="color:var(--green)">Vendu — livré</div></div>
+      <div class="illegal-row"><div class="illegal-key">Technicien assigné</div><div class="illegal-val purple">Kash Salvatore</div></div>
+      <div class="mods-list">
+        <div class="mods-label">MODS ILLÉGAUX :</div>
+        <span class="mod-tag">Plaque falsifiée</span><span class="mod-tag">Compartiment caché</span><span class="mod-tag">Nitro hors norme</span>
+      </div>
+    </div>
+
+    <div class="illegal-card">
+      <div class="illegal-card-header">
+        <div><div class="illegal-car-name">Grotti Itali RSX</div><div class="illegal-car-sub">Supercar — 2024</div></div>
+        <div class="illegal-plate">9ITR-512</div>
+      </div>
+      <div class="illegal-row"><div class="illegal-key">VIN d'origine</div><div class="illegal-val">GRT-2024-110283-C</div></div>
+      <div class="illegal-row"><div class="illegal-key">VIN falsifié</div><div class="illegal-val danger">GRT-2024-007771-F ⚠</div></div>
+      <div class="illegal-row"><div class="illegal-key">Volé à</div><div class="illegal-val">Portola Drive — 07/05/25</div></div>
+      <div class="illegal-row"><div class="illegal-key">Propriétaire d'origine</div><div class="illegal-val">Voiture de location — non identifié</div></div>
+      <div class="illegal-row"><div class="illegal-key">Valeur marché noir</div><div class="illegal-val money">$410 000</div></div>
+      <div class="illegal-row"><div class="illegal-key">Statut</div><div class="illegal-val danger">Entrant — non transformé</div></div>
+      <div class="illegal-row"><div class="illegal-key">Technicien assigné</div><div class="illegal-val purple">Roy Koenigsegg</div></div>
+      <div class="mods-list">
+        <div class="mods-label">MODS ILLÉGAUX :</div>
+        <span class="mod-tag">En attente</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-divider purple">Clients du réseau occulte</div>
+  <div class="client-cards-grid">
+
+    <div class="client-card">
+      <div class="client-name">El Rubio</div>
+      <div class="client-alias">// alias : "El Patrón" — cartel Madrazo</div>
+      <div class="illegal-row" style="border-color:rgba(164,74,232,0.1);"><div class="illegal-key">Contact</div><div class="illegal-val">Burner — intermédiaire</div></div>
+      <div class="illegal-row" style="border-color:rgba(164,74,232,0.1);"><div class="illegal-key">Total commandes</div><div class="illegal-val money">$780 000</div></div>
+      <div class="illegal-row" style="border-color:rgba(164,74,232,0.1);"><div class="illegal-key">Spécialité demandée</div><div class="illegal-val">Blindage + GPS retiré</div></div>
+      <div class="illegal-row" style="border-color:rgba(164,74,232,0.1);"><div class="illegal-key">Niveau de confiance</div><div class="illegal-val" style="color:var(--green)">★★★★★</div></div>
+      <div class="heat-bar-wrap">
+        <div class="heat-label"><span>Risque LSPD</span><span style="color:var(--red)">CRITIQUE</span></div>
+        <div class="heat-track"><div class="heat-fill" style="width:92%;background:var(--red);"></div></div>
+      </div>
+    </div>
+
+    <div class="client-card">
+      <div class="client-name">Yusuf Amir</div>
+      <div class="client-alias">// alias : "Gold Guy" — investisseur fictif</div>
+      <div class="illegal-row" style="border-color:rgba(164,74,232,0.1);"><div class="illegal-key">Contact</div><div class="illegal-val">Ligne sécurisée directe</div></div>
+      <div class="illegal-row" style="border-color:rgba(164,74,232,0.1);"><div class="illegal-key">Total commandes</div><div class="illegal-val money">$245 000</div></div>
+      <div class="illegal-row" style="border-color:rgba(164,74,232,0.1);"><div class="illegal-key">Spécialité demandée</div><div class="illegal-val">Véhicules de luxe recélés</div></div>
+      <div class="illegal-row" style="border-color:rgba(164,74,232,0.1);"><div class="illegal-key">Niveau de confiance</div><div class="illegal-val" style="color:var(--green)">★★★★☆</div></div>
+      <div class="heat-bar-wrap">
+        <div class="heat-label"><span>Risque LSPD</span><span style="color:var(--accent)">MODÉRÉ</span></div>
+        <div class="heat-track"><div class="heat-fill" style="width:45%;background:var(--accent);"></div></div>
+      </div>
+    </div>
+
+    <div class="client-card">
+      <div class="client-name">Toni Castillo</div>
+      <div class="client-alias">// alias : "La Sombra" — indépendant</div>
+      <div class="illegal-row" style="border-color:rgba(164,74,232,0.1);"><div class="illegal-key">Contact</div><div class="illegal-val">Message chiffré uniquement</div></div>
+      <div class="illegal-row" style="border-color:rgba(164,74,232,0.1);"><div class="illegal-key">Total commandes</div><div class="illegal-val money">$112 500</div></div>
+      <div class="illegal-row" style="border-color:rgba(164,74,232,0.1);"><div class="illegal-key">Spécialité demandée</div><div class="illegal-val">Muscle cars + nitro</div></div>
+      <div class="illegal-row" style="border-color:rgba(164,74,232,0.1);"><div class="illegal-key">Niveau de confiance</div><div class="illegal-val" style="color:var(--accent)">★★★☆☆</div></div>
+      <div class="heat-bar-wrap">
+        <div class="heat-label"><span>Risque LSPD</span><span style="color:var(--green)">FAIBLE</span></div>
+        <div class="heat-track"><div class="heat-fill" style="width:22%;background:var(--green);"></div></div>
+      </div>
+    </div>
+
+    <div class="client-card">
+      <div class="client-name">Viktor Reznik</div>
+      <div class="client-alias">// alias : "The Bear" — réseau Est-Européen</div>
+      <div class="illegal-row" style="border-color:rgba(164,74,232,0.1);"><div class="illegal-key">Contact</div><div class="illegal-val">Via Kash Salvatore</div></div>
+      <div class="illegal-row" style="border-color:rgba(164,74,232,0.1);"><div class="illegal-key">Total commandes</div><div class="illegal-val money">$640 000</div></div>
+      <div class="illegal-row" style="border-color:rgba(164,74,232,0.1);"><div class="illegal-key">Spécialité demandée</div><div class="illegal-val">Export — haut-de-gamme</div></div>
+      <div class="illegal-row" style="border-color:rgba(164,74,232,0.1);"><div class="illegal-key">Niveau de confiance</div><div class="illegal-val" style="color:var(--green)">★★★★★</div></div>
+      <div class="heat-bar-wrap">
+        <div class="heat-label"><span>Risque LSPD</span><span style="color:var(--red)">TRÈS ÉLEVÉ</span></div>
+        <div class="heat-track"><div class="heat-fill" style="width:78%;background:var(--red);"></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-divider purple">Opérations en cours</div>
+  <div class="table-box" style="border-color:rgba(164,74,232,0.15);">
+    <div class="table-header-row" style="grid-template-columns:2fr 1fr 1fr 1fr 120px;">
+      <div class="th">Opération</div><div class="th">Responsable</div><div class="th">Client</div><div class="th">Gain</div><div class="th">Statut</div>
+    </div>
+    <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 120px;"><div class="td highlight">Repeinture Zentorno + faux VIN</div><div class="td" style="color:var(--purple);">Diego S.</div><div class="td">El Rubio</div><div class="td" style="color:var(--green)">$320k</div><div class="td"><span class="status-badge pending">En cours</span></div></div>
+    <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 120px;"><div class="td highlight">Blindage Sentinel RS</div><div class="td" style="color:var(--purple);">Marlon S.</div><div class="td">Viktor Reznik</div><div class="td" style="color:var(--green)">$148k</div><div class="td"><span class="status-badge pending">En cours</span></div></div>
+    <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 120px;"><div class="td highlight">Export RSX — Port Vespucci</div><div class="td" style="color:var(--purple);">Kash S.</div><div class="td">Viktor Reznik</div><div class="td" style="color:var(--green)">$410k</div><div class="td"><span class="status-badge danger">RISQUÉ</span></div></div>
+    <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 120px;"><div class="td highlight">Vigero ZX — kit dissimulé</div><div class="td" style="color:var(--purple);">Kash S.</div><div class="td">Toni Castillo</div><div class="td" style="color:var(--green)">$95k</div><div class="td"><span class="status-badge done">Livré</span></div></div>
+  </div>
+
+  <div style="background:rgba(232,74,74,0.05);border:1px solid rgba(232,74,74,0.2);padding:1rem 1.5rem;margin-top:2rem;font-family:var(--mono);font-size:11px;color:rgba(232,74,74,0.75);letter-spacing:1px;line-height:1.8;">
+    ⚠ RAPPEL — Toute fuite de ce dossier déclenche les protocoles de fermeture.<br>
+    Contact d'urgence : Zoé Connor uniquement. Ne JAMAIS utiliser les lignes officielles.<br>
+    Prochain nettoyage des données : Dimanche 11/05/2025 — 03:00
+  </div>
+</div>
+
+</main>
+
+<!-- EMPLOYEE MODAL -->
+<div class="modal-overlay" id="emp-modal" onclick="closeModalOutside(event)">
+  <div class="modal" id="modal-box">
+    <div class="modal-header">
+      <div class="modal-identity">
+        <div class="modal-avatar" id="m-avatar"></div>
+        <div>
+          <div class="modal-name" id="m-name"></div>
+          <div class="modal-role-badge" id="m-badge"></div>
         </div>
       </div>
-      <div class="bypass-instructions">
-        Le curseur rouge se déplace de gauche à droite.<br>
-        Clique sur <b>STOP</b> quand il est dans la zone verte.<br>
-        <span style="color:#ef4444">⚠ Une seule erreur = alarme !</span>
-      </div>
-      <button class="bypass-stop" id="bypass-stop">STOP</button>
-      <div class="bypass-progress" id="bypass-progress">
-        <div class="bypass-dot current"></div>
-        <div class="bypass-dot"></div>
-        <div class="bypass-dot"></div>
-      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
-
-    <!-- FLEECA SUCCESS -->
-    <div id="fleeca-success" class="screen">
-      <div class="fleeca-header">
-        <div class="fleeca-logo">FLEECA</div>
-        <div class="fleeca-tag">COFFRE DÉVERROUILLÉ</div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <div class="modal-section-title">// Informations générales</div>
+        <div class="modal-row"><div class="modal-key">Poste</div><div class="modal-val" id="m-post"></div></div>
+        <div class="modal-row"><div class="modal-key">Date d'embauche</div><div class="modal-val" id="m-date"></div></div>
+        <div class="modal-row"><div class="modal-key">Spécialité</div><div class="modal-val" id="m-spec"></div></div>
+        <div class="modal-row"><div class="modal-key">Statut</div><div class="modal-val green" id="m-status"></div></div>
       </div>
-      <div class="vault-icon">🔓</div>
-      <div class="success-title">ALARME NEUTRALISÉE</div>
-      <div class="success-sub">CODE DU JOUR GÉNÉRÉ</div>
-      <div class="code-box">
-        <div class="lbl">CODE D'ACCÈS — VALIDE 24H</div>
-        <div class="code-digits">
-          <div class="code-digit">2</div>
-          <div class="code-digit">9</div>
-          <div class="code-digit">4</div>
-          <div class="code-digit">1</div>
+      <div class="modal-section">
+        <div class="modal-section-title">// Performance — semaine en cours</div>
+        <div class="modal-row"><div class="modal-key">Ventes réalisées</div><div class="modal-val accent" id="m-sales"></div></div>
+        <div class="modal-row"><div class="modal-key">Chiffre d'affaires généré</div><div class="modal-val green" id="m-revenue"></div></div>
+        <div class="modal-row"><div class="modal-key">Commission perçue</div><div class="modal-val accent" id="m-commission"></div></div>
+        <div class="modal-row"><div class="modal-key">Satisfaction client</div><div class="modal-val" id="m-satisfaction"></div></div>
+        <div style="margin-top:1.2rem;">
+          <div class="sales-bar-row"><div class="sales-bar-label"><span>Lundi</span><span id="m-d1v"></span></div><div class="sales-bar-track"><div class="sales-bar-fill" id="m-d1"></div></div></div>
+          <div class="sales-bar-row"><div class="sales-bar-label"><span>Mardi</span><span id="m-d2v"></span></div><div class="sales-bar-track"><div class="sales-bar-fill" id="m-d2"></div></div></div>
+          <div class="sales-bar-row"><div class="sales-bar-label"><span>Mercredi</span><span id="m-d3v"></span></div><div class="sales-bar-track"><div class="sales-bar-fill" id="m-d3"></div></div></div>
+          <div class="sales-bar-row"><div class="sales-bar-label"><span>Jeudi</span><span id="m-d4v"></span></div><div class="sales-bar-track"><div class="sales-bar-fill" id="m-d4"></div></div></div>
+          <div class="sales-bar-row"><div class="sales-bar-label"><span>Vendredi</span><span id="m-d5v"></span></div><div class="sales-bar-track"><div class="sales-bar-fill" id="m-d5"></div></div></div>
+          <div class="sales-bar-row"><div class="sales-bar-label"><span>Samedi</span><span id="m-d6v"></span></div><div class="sales-bar-track"><div class="sales-bar-fill" id="m-d6"></div></div></div>
         </div>
       </div>
-      <div class="success-time" id="success-time">Généré à <span></span></div>
-      <button class="fleeca-btn primary" style="margin-top:18px" onclick="resetAll()">🔄 NOUVELLE SESSION</button>
-    </div>
-
-    <!-- APP POPUP -->
-    <div id="app-popup">
-      <div class="popup-box">
-        <div class="popup-icon" id="popup-icon">📱</div>
-        <div class="popup-title" id="popup-title">App</div>
-        <div class="popup-text" id="popup-text">...</div>
-        <button class="popup-btn" onclick="closePopup()">Fermer</button>
+      <div class="modal-section">
+        <div class="modal-section-title">// Salaire & contrat</div>
+        <div class="modal-row"><div class="modal-key">Salaire de base / sem.</div><div class="modal-val" id="m-salary"></div></div>
+        <div class="modal-row"><div class="modal-key">Total brut (base + commission)</div><div class="modal-val green" id="m-total"></div></div>
+        <div class="modal-row"><div class="modal-key">Type de contrat</div><div class="modal-val" id="m-contract"></div></div>
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- ============= GLITCH TRANSITION ============= -->
-<div id="glitch-overlay"></div>
-
-<!-- ============= INTRO SAHP ============= -->
-<div id="intro-screen">
-  <div class="sahp-panel">
-    <div class="sahp-title">DÉCRYPTAGE — PROTOCOLE SAHP</div>
-    <div class="sahp-subtitle">CLIQUEZ LES CODES DANS L'ORDRE INDIQUÉ</div>
-    <div class="sahp-timer-row">
-      <span>TEMPS RESTANT</span>
-      <span id="sahp-time">10.0s</span>
+<!-- MINIGAME: WIRE -->
+<div class="mg-overlay" id="wire-modal">
+  <div class="mg-modal">
+    <div class="mg-header">
+      <div class="mg-title">⚡ Reconnecter les fils</div>
+      <button class="mg-close" onclick="cancelMG('wire')">✕</button>
     </div>
-    <div class="sahp-timer-bar"><div class="sahp-timer-fill" id="sahp-timer-fill"></div></div>
-    <div class="sahp-target">
-      <div class="sahp-target-label">SÉQUENCE CIBLE</div>
-      <div class="sahp-target-cells" id="sahp-target"></div>
+    <div class="mg-instruction">// SÉCURITÉ DÉTECTÉE — Reconnecte chaque fil à la douille de la même couleur. Clique d'abord un fil, puis sa douille.</div>
+    <div class="wire-game">
+      <div class="wire-col" id="wire-left"></div>
+      <div class="wire-col" id="wire-right"></div>
     </div>
-    <div class="sahp-grid" id="sahp-grid"></div>
-    <div class="sahp-status" id="sahp-status">&nbsp;</div>
+    <div class="mg-status" id="wire-status">Sélectionne un fil...</div>
   </div>
 </div>
 
-<!-- ============= TERMINAL ============= -->
-<div id="terminal-overlay">
-  <div id="terminal">
-    <div id="output"></div>
-    <div id="input-line" class="hidden">
-      <span id="prompt">root@hack:~$</span>
-      <input id="cmd-input" autocomplete="off" spellcheck="false">
+<!-- MINIGAME: PAINT -->
+<div class="mg-overlay" id="paint-modal">
+  <div class="mg-modal">
+    <div class="mg-header">
+      <div class="mg-title">🎨 Correspondance peinture</div>
+      <button class="mg-close" onclick="cancelMG('paint')">✕</button>
+    </div>
+    <div class="mg-instruction">// Identifie 5 teintes consécutives sans erreur. Clique la couleur correspondant à la cible affichée.</div>
+    <div class="paint-target-wrap">
+      <div class="paint-target" id="paint-target"></div>
+      <div class="paint-target-name" id="paint-target-name">—</div>
+    </div>
+    <div class="paint-grid" id="paint-grid"></div>
+    <div class="mg-status" id="paint-status">—</div>
+    <div class="mg-progress" id="paint-progress">
+      <div class="mg-progress-dot"></div><div class="mg-progress-dot"></div><div class="mg-progress-dot"></div><div class="mg-progress-dot"></div><div class="mg-progress-dot"></div>
     </div>
   </div>
 </div>
 
-<!-- ============= ALARM ============= -->
-<div id="alarm-screen">
-  <div class="alarm-icon">🚨</div>
-  <div class="alarm-title">INTRUSION DÉTECTÉE</div>
-  <div class="alarm-sub">ALARME DÉCLENCHÉE<br>POLICE EN ROUTE — SESSION ANNULÉE</div>
-  <div class="alarm-countdown" id="alarm-countdown">RESET DANS 3...</div>
+<!-- MINIGAME: ENGINE -->
+<div class="mg-overlay" id="engine-modal">
+  <div class="mg-modal">
+    <div class="mg-header">
+      <div class="mg-title">🔧 Démarrage moteur</div>
+      <button class="mg-close" onclick="cancelMG('engine')">✕</button>
+    </div>
+    <div class="mg-instruction">// Synchronise l'allumage. Appuie sur IGNITE quand l'aiguille passe dans la zone verte. 3 ignitions réussies pour démarrer.</div>
+    <div class="engine-gauge-wrap">
+      <div class="engine-rpm" id="engine-rpm">0 RPM</div>
+      <div class="engine-gauge">
+        <div class="engine-zone"></div>
+        <div class="engine-needle" id="engine-needle"></div>
+      </div>
+      <div class="engine-labels"><span>0</span><span>5000</span><span>10000</span></div>
+    </div>
+    <button class="engine-btn" onclick="igniteEngine()">IGNITE</button>
+    <div class="mg-status" id="engine-status">—</div>
+    <div class="mg-progress" id="engine-progress">
+      <div class="mg-progress-dot"></div><div class="mg-progress-dot"></div><div class="mg-progress-dot"></div>
+    </div>
+  </div>
 </div>
+
+<footer>
+  <div class="footer-text">LSCUSTOM INTERNAL DATABASE v2.5 — USAGE RESTREINT AU PERSONNEL AUTORISÉ</div>
+  <div style="font-family:var(--mono);font-size:10px;color:var(--muted);">BUILD 2025.S19</div>
+</footer>
 
 <script>
-/* ============================================================
-   AUDIO (synthétisé)
-============================================================ */
-let audioCtx = null;
-function ensureAudio(){
-  if (!audioCtx) {
-    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-    catch(e) { return false; }
-  }
-  return true;
-}
-function beep(freq, duration, type='square', vol=0.04){
-  if (!ensureAudio()) return;
-  const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
-  o.type = type; o.frequency.value = freq;
-  g.gain.value = vol;
-  o.connect(g); g.connect(audioCtx.destination);
-  o.start();
-  o.stop(audioCtx.currentTime + duration);
-}
-function alarmSiren(){
-  if (!ensureAudio()) return;
-  for (let i = 0; i < 6; i++){
-    setTimeout(()=>{
-      beep(900, 0.25, 'sawtooth', 0.06);
-      setTimeout(()=>beep(600, 0.25, 'sawtooth', 0.06), 250);
-    }, i * 500);
-  }
-}
-
-/* ============================================================
-   HORLOGE
-============================================================ */
+// CLOCK
 function updateClock(){
-  const d = new Date();
-  const h = String(d.getHours()).padStart(2,'0');
-  const m = String(d.getMinutes()).padStart(2,'0');
-  document.getElementById('status-time').textContent = h+':'+m;
-  document.getElementById('big-time').textContent = h+':'+m;
+  const n=new Date();
+  document.getElementById('clock').textContent=n.toLocaleDateString('fr-FR')+' — '+n.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 }
-updateClock();
-setInterval(updateClock, 30000);
+updateClock();setInterval(updateClock,1000);
 
-/* ============================================================
-   NAVIGATION DES ÉCRANS
-============================================================ */
-function showScreen(id){
-  document.querySelectorAll('#phone-screen > .screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-function goHome(){ showScreen('home-screen'); }
-
-/* ============================================================
-   APPS INUTILES
-============================================================ */
-const APP_MSGS = {
-  messages: { icon:'💬', title:'Messages', text:'Aucun message.<br><br>Pas même un spam. Forever alone.' },
-  photos:   { icon:'📷', title:'Photos',   text:'67 selfies ratés détectés.<br><br>Vraiment continuer ?' },
-  music:    { icon:'🎵', title:'Music+',   text:'Abonnement expiré depuis 2019.<br><br>Renouvellement : 9,99€/mois.' },
-  snake:    { icon:'🐍', title:'Snake',    text:'GAME OVER<br><br>Tu as perdu avant même d\'avoir commencé.' },
-  weather:  { icon:'☁️', title:'Météo',    text:'Los Santos : il pleut.<br>Demain : il pleuvra.<br>Toujours.' },
-  food:     { icon:'🍔', title:'EatUp',    text:'Tous les restos sont fermés.<br><br>Cuisine toi-même pour une fois.' },
-  casino:   { icon:'🎰', title:'Casino',   text:'SOLDE ACTUEL : -2 847 €<br><br>Continuer à parier ? (Mauvaise idée)' },
-  calendar: { icon:'📅', title:'Calendar', text:'Aucun rendez-vous prévu.<br>Aucun ami connecté.<br>Aucune notification.' },
-  settings: { icon:'⚙️', title:'Réglages', text:'Accès refusé.<br><br>Veuillez rebooter votre cerveau.' },
-  browser:  { icon:'🌐', title:'Browser',  text:'Historique :<br>• comment.devenir.riche.fr<br>• gta.online.cheats<br>• vol.banque.tutoriel' },
-  game:     { icon:'🎮', title:'RagePlay', text:'Erreur 404 — fun introuvable.<br><br>(Désinstaller cette app ?)' },
-};
-
-document.querySelectorAll('.app').forEach(el => {
-  el.addEventListener('click', () => {
-    const id = el.dataset.app;
-    if (id === 'fleeca'){
-      ensureAudio();
-      beep(800, 0.05, 'sine', 0.05);
-      showScreen('fleeca-login');
-    } else {
-      const m = APP_MSGS[id];
-      ensureAudio();
-      beep(440, 0.04, 'square', 0.03);
-      document.getElementById('popup-icon').textContent = m.icon;
-      document.getElementById('popup-title').textContent = m.title;
-      document.getElementById('popup-text').innerHTML = m.text;
-      document.getElementById('app-popup').classList.add('show');
-    }
-  });
-});
-function closePopup(){ document.getElementById('app-popup').classList.remove('show'); }
-
-/* ============================================================
-   GLITCH TRANSITION
-============================================================ */
-async function glitchTransition(){
-  const ov = document.getElementById('glitch-overlay');
-  ov.classList.add('show');
-  beep(150, 0.3, 'sawtooth', 0.08);
-  setTimeout(()=>beep(80, 0.3, 'sawtooth', 0.08), 200);
-  await new Promise(r => setTimeout(r, 600));
-  ov.classList.remove('show');
-}
-
-/* ============================================================
-   DÉMARRAGE DU HACK (depuis Fleeca login)
-============================================================ */
-async function startHack(){
-  ensureAudio();
-  beep(200, 0.15, 'sawtooth', 0.06);
-  await glitchTransition();
-  document.getElementById('phone').style.display = 'none';
-  document.getElementById('matrix-bg').classList.add('show');
-  document.getElementById('intro-screen').classList.add('show');
-  setupSAHP();
-}
-
-/* ============================================================
-   MINI-JEU SAHP
-============================================================ */
-const sahpGrid    = document.getElementById('sahp-grid');
-const sahpTarget  = document.getElementById('sahp-target');
-const sahpTimerEl = document.getElementById('sahp-time');
-const sahpFill    = document.getElementById('sahp-timer-fill');
-const sahpStatus  = document.getElementById('sahp-status');
-const SAHP_DURATION = 10;
-let sahpInterval = null;
-let sahpTimeLeft, sahpSequence, sahpStep, sahpGridCodes, sahpFinished;
-
-function randHex(){ return Math.floor(Math.random()*256).toString(16).toUpperCase().padStart(2,'0'); }
-function shuffle(arr){
-  for (let i=arr.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [arr[i],arr[j]] = [arr[j],arr[i]];
-  }
-  return arr;
-}
-
-function setupSAHP(){
-  const set = new Set();
-  while (set.size < 4) set.add(randHex());
-  sahpSequence = [...set];
-  const all = new Set(sahpSequence);
-  while (all.size < 25) all.add(randHex());
-  sahpGridCodes = shuffle([...all]);
-
-  sahpTarget.innerHTML = '';
-  sahpSequence.forEach((code, i) => {
-    if (i > 0){
-      const ar = document.createElement('span');
-      ar.className = 'sahp-arrow'; ar.textContent = '▸';
-      sahpTarget.appendChild(ar);
-    }
-    const c = document.createElement('div');
-    c.className = 'sahp-target-cell' + (i === 0 ? ' active' : '');
-    c.textContent = code;
-    sahpTarget.appendChild(c);
-  });
-
-  sahpGrid.innerHTML = '';
-  sahpGridCodes.forEach(code => {
-    const cell = document.createElement('div');
-    cell.className = 'sahp-cell';
-    cell.textContent = code;
-    cell.dataset.code = code;
-    cell.addEventListener('click', () => onSahpClick(cell));
-    sahpGrid.appendChild(cell);
-  });
-
-  sahpStep = 0;
-  sahpTimeLeft = SAHP_DURATION;
-  sahpFinished = false;
-  sahpStatus.textContent = '\u00A0';
-  sahpStatus.className = 'sahp-status';
-  sahpFill.style.width = '100%';
-  sahpTimerEl.textContent = SAHP_DURATION.toFixed(1)+'s';
-  clearInterval(sahpInterval);
-  sahpInterval = setInterval(tickSAHP, 100);
-}
-
-function tickSAHP(){
-  if (sahpFinished) return;
-  sahpTimeLeft -= 0.1;
-  if (sahpTimeLeft <= 0){
-    sahpTimerEl.textContent = '0.0s';
-    sahpFill.style.width = '0%';
-    failSAHP('TEMPS ECOULE - NOUVELLE TENTATIVE');
+// TABS
+let secretUnlocked=false;
+let bankUnlocked=false;
+let illegalDetailsUnlocked=false;
+function switchTab(tab){
+  if(tab==='secret'&&!secretUnlocked){
+    startWireGame(()=>{secretUnlocked=true;switchTab('secret');});
     return;
   }
-  sahpTimerEl.textContent = sahpTimeLeft.toFixed(1)+'s';
-  sahpFill.style.width = (sahpTimeLeft / SAHP_DURATION * 100) + '%';
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  const map={dashboard:0,employees:1,services:2,finances:3,secret:4};
+  document.querySelectorAll('.tab')[map[tab]].classList.add('active');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+tab).classList.add('active');
 }
 
-function onSahpClick(cell){
-  if (sahpFinished) return;
-  const code = cell.dataset.code;
-  const expected = sahpSequence[sahpStep];
-  if (code === expected){
-    beep(880, 0.05, 'sine', 0.04);
-    cell.classList.add('found');
-    const tc = sahpTarget.querySelectorAll('.sahp-target-cell');
-    tc[sahpStep].classList.remove('active');
-    tc[sahpStep].classList.add('done');
-    sahpStep++;
-    if (sahpStep >= sahpSequence.length) winSAHP();
-    else tc[sahpStep].classList.add('active');
-  } else {
-    beep(200, 0.15, 'sawtooth', 0.05);
-    cell.classList.add('wrong');
-    setTimeout(()=>cell.classList.remove('wrong'), 400);
-    failSAHP('CODE INCORRECT - SEQUENCE REINITIALISEE');
-  }
-}
-
-function failSAHP(msg){
-  sahpStatus.textContent = msg;
-  sahpStatus.className = 'sahp-status fail';
-  clearInterval(sahpInterval);
-  setTimeout(setupSAHP, 1200);
-}
-
-function winSAHP(){
-  sahpFinished = true;
-  clearInterval(sahpInterval);
-  beep(1200, 0.3, 'sine', 0.05);
-  sahpStatus.textContent = 'PROTOCOLE DECRYPTE - ACCES DARKNET AUTORISE';
-  sahpStatus.className = 'sahp-status win';
-  setTimeout(() => {
-    document.getElementById('intro-screen').classList.remove('show');
-    document.getElementById('terminal-overlay').classList.add('show');
-    bootSequence();
-  }, 1000);
-}
-
-/* ============================================================
-   MATRIX BACKGROUND
-============================================================ */
-const canvas = document.getElementById('matrix-bg');
-const ctx = canvas.getContext('2d');
-function resize(){ canvas.width = innerWidth; canvas.height = innerHeight; }
-resize();
-addEventListener('resize', resize);
-const mxChars = '01ABCDEF$#@!*&%<>?/\\';
-const fontSize = 14;
-let drops = [];
-function initDrops(){
-  drops = [];
-  const cols = Math.floor(canvas.width / fontSize);
-  for (let i=0;i<cols;i++) drops.push(Math.random()*-50);
-}
-initDrops();
-addEventListener('resize', initDrops);
-setInterval(()=>{
-  ctx.fillStyle = 'rgba(0,0,0,0.06)';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle = '#00ff41';
-  ctx.font = fontSize+'px monospace';
-  for (let i=0;i<drops.length;i++){
-    const ch = mxChars[Math.floor(Math.random()*mxChars.length)];
-    ctx.fillText(ch, i*fontSize, drops[i]*fontSize);
-    if (drops[i]*fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-    drops[i]++;
-  }
-}, 55);
-
-/* ============================================================
-   TERMINAL
-============================================================ */
-const output = document.getElementById('output');
-const inputLine = document.getElementById('input-line');
-const cmdInput = document.getElementById('cmd-input');
-const promptEl = document.getElementById('prompt');
-const terminal = document.getElementById('terminal');
-
-let stage = 'boot';
-let state = {};
-
-const sleep = ms => new Promise(r=>setTimeout(r,ms));
-function scrollDown(){ terminal.scrollTop = terminal.scrollHeight; }
-function addLine(text, cls=''){
-  const d = document.createElement('div');
-  d.className = 'line '+cls;
-  d.textContent = text;
-  output.appendChild(d);
-  scrollDown();
-}
-function addHTML(html, cls=''){
-  const d = document.createElement('div');
-  d.className = 'line '+cls;
-  d.innerHTML = html;
-  output.appendChild(d);
-  scrollDown();
-}
-async function typeLine(text, cls='', speed=14){
-  const d = document.createElement('div');
-  d.className = 'line '+cls;
-  output.appendChild(d);
-  for (let i=0;i<text.length;i++){
-    d.textContent += text[i];
-    scrollDown();
-    await sleep(speed);
-  }
-}
-const fakeCodes = [
-  '> 0x7FA3...injecting payload...',
-  '> SEGFAULT @ 0xDEADBEEF',
-  '> kernel panic: not syncing!',
-  '> TCP/IP stack corrupted -> rerouting...',
-  '> buffer overflow detected in /lib/ssl',
-  '> 01001000 01100001 01100011 01101011',
-  '> rm -rf /sys/firewall/log/*',
-  '>>> ERR: stack overflow at ret addr 0x4f3a',
-  '> WARN: trace route diverted via TOR-node-7',
-  '> XOR key rotation failed... retry',
-  '> AES-256 brute force in progress...',
-  '> sudo: command from /tmp/.shadow.bin',
-  '> eth0: link down... reconnecting in 2s',
-  '> [CRITICAL] memory leak in /proc/self/maps',
-  '> $ nc -lvnp 31337  | ./exploit.sh',
-  '> [hex] 0x00ff41 0xdeadc0de 0xcafebabe',
-  '> proxy chain: TOR -> VPN -> SSH -> ...',
-  '> CVE-2024-XX42 vulnerability confirmed',
-];
-async function glitchBurst(n=5, delay=70){
-  for (let i=0;i<n;i++){
-    addLine(fakeCodes[Math.floor(Math.random()*fakeCodes.length)], 'dim glitch');
-    await sleep(delay);
-  }
-}
-function showInput(){ inputLine.classList.remove('hidden'); cmdInput.value=''; cmdInput.focus(); scrollDown(); }
-function hideInput(){ inputLine.classList.add('hidden'); }
-
-async function bootSequence(){
-  output.innerHTML = '';
-  hideInput();
-  await typeLine('[INTRUSION] Protocole SAHP decrypte avec succes.', 'info', 16);
-  await typeLine('[INTRUSION] Connexion au serveur FLEECA en cours...', 'info', 16);
-  await sleep(200);
-  await glitchBurst(5, 60);
-  await typeLine('Initialisation du systeme...', 'info', 22);
-  const bootMsgs = [
-    '[ OK ] Chargement du noyau Linux 5.15.0-hack',
-    '[ OK ] Montage du systeme de fichiers crypte (LUKS)',
-    '[ OK ] Demarrage des modules reseau (eth0, wlan0)',
-    '[ OK ] Initialisation du proxy TOR... circuit etabli',
-    '[ OK ] Activation du VPN multicouche (5/5 noeuds)',
-    '[ OK ] Chargement de la suite Metasploit v6.3',
-    '[ OK ] Outils nmap / hydra / john pretes',
-    '[ OK ] Effacement des logs Fleeca',
-  ];
-  for (const m of bootMsgs){ addLine(m, 'success'); await sleep(80); }
-  await sleep(200);
-  addLine('[ !! ] DETECTION: connexion non autorisee ???', 'warning');
-  await sleep(300);
-  await glitchBurst(6, 70);
-  addLine('[ OK ] Faux positif - systeme stabilise', 'success');
-  await sleep(300);
-  addHTML(`<pre class="ascii-art success">
-        ████████╗██╗  ██╗███████╗    ██╗  ██╗ █████╗  ██████╗██╗  ██╗
-        ╚══██╔══╝██║  ██║██╔════╝    ██║  ██║██╔══██╗██╔════╝██║ ██╔╝
-           ██║   ███████║█████╗      ███████║███████║██║     █████╔╝ 
-           ██║   ██╔══██║██╔══╝      ██╔══██║██╔══██║██║     ██╔═██╗ 
-           ██║   ██║  ██║███████╗    ██║  ██║██║  ██║╚██████╗██║  ██╗
-           ╚═╝   ╚═╝  ╚═╝╚══════╝    ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
-              CIBLE : FLEECA BANK -- ACCES MANAGER -- 3 DEFIS
-  </pre>`);
-  await sleep(500);
-  addHTML('<div class="box">+============================================================+</div>');
-  addHTML('<div class="box">|  MISSION : Obtenir l\'acces manager Fleeca                  |</div>');
-  addHTML('<div class="box">|  OBJECTIF: Reussir 3 epreuves pour retourner dans l\'app    |</div>');
-  addHTML('<div class="box">|  DEFIS   : Cesar (facile) -> Firewall -> Binaire (dur)     |</div>');
-  addHTML('<div class="box">+============================================================+</div>');
-  await sleep(300);
-  addLine('', '');
-  await typeLine('>> Tape "help" pour voir les commandes.', 'warning', 12);
-  await typeLine('>> Tape "start" pour commencer la mission.', 'warning', 12);
-  stage = 'menu';
-  promptEl.textContent = 'root@darknet:~$';
-  showInput();
-}
-
-async function startGame1(){
-  hideInput();
-  await glitchBurst(3, 60);
-  addLine('', '');
-  addLine('+==========================================+', 'info');
-  addLine('|   DEFI 1/3 - DECRYPTAGE CESAR (FACILE)   |', 'info');
-  addLine('+==========================================+', 'info');
-  addLine('', '');
-  await typeLine('Tu as intercepte un message chiffre par CESAR (decalage +3).', '', 11);
-  await typeLine('Chaque lettre du message a ete decalee de 3 vers la DROITE.', '', 11);
-  await typeLine('Pour le decrypter, decale chaque lettre de 3 vers la GAUCHE.', '', 11);
-  addLine('', '');
-  addLine('  Exemple : A -> D,  B -> E,  C -> F  (chiffrement)', 'dim');
-  addLine('  Donc pour dechiffrer : D -> A,  E -> B,  F -> C', 'dim');
-  addLine('', '');
-  addLine('  >>> MESSAGE CHIFFRE : KDFN  <<<', 'success big');
-  addLine('', '');
-  addLine('  Aide : K -> ?,  D -> ?,  F -> ?,  K -> ?', 'warning');
-  addLine('  COMMANDE : decrypt <mot>', 'info');
-  stage = 'game1';
-  promptEl.textContent = 'hacker@cryptobank:~$';
-  showInput();
-}
-
-async function startGame2(){
-  hideInput();
-  await glitchBurst(4, 60);
-  addLine('', '');
-  addLine('+============================================+', 'info');
-  addLine('|  DEFI 2/3 - INTRUSION FIREWALL (MOYEN)     |', 'info');
-  addLine('+============================================+', 'info');
-  addLine('', '');
-  await typeLine('Tu dois contourner le pare-feu de FLEECA en 4 etapes.', '', 11);
-  await typeLine('Tape les commandes UNE PAR UNE dans LE BON ORDRE :', '', 11);
-  addLine('', '');
-  addLine('   1. scan      -> scanner les ports ouverts', 'warning');
-  addLine('   2. connect   -> etablir une connexion', 'warning');
-  addLine('   3. bypass    -> contourner la securite', 'warning');
-  addLine('   4. inject    -> injecter le payload', 'warning');
-  addLine('', '');
-  addLine('   /!\\  Mauvais ordre = retour au debut !', 'error');
-  addLine('', '');
-  addLine('   >>> ETAPE 1/4 - tape "scan"  <<<', 'success big');
-  state.g2 = 1;
-  stage = 'game2';
-  promptEl.textContent = 'hacker@firewall:~$';
-  showInput();
-}
-
-async function startGame3(){
-  hideInput();
-  await glitchBurst(5, 60);
-  addLine('', '');
-  addLine('+============================================+', 'info');
-  addLine('|  DEFI 3/3 - CRYPTANALYSE BINAIRE (DUR)     |', 'info');
-  addLine('+============================================+', 'info');
-  addLine('', '');
-  await typeLine('Tu as recupere 3 cles chiffrees en BINAIRE.', '', 11);
-  await typeLine('Convertis chaque cle en DECIMAL puis ADDITIONNE les 3.', '', 11);
-  addLine('', '');
-  addLine('  RAPPEL : binaire -> decimal', 'warning');
-  addLine('  position : 7  6  5  4  3  2  1  0', 'dim');
-  addLine('  valeur   :128 64 32 16  8  4  2  1', 'dim');
-  addLine('  Ex : 00001011 = 0+0+0+0+8+0+2+1 = 11', 'dim');
-  addLine('', '');
-  addLine('   >>>  CLE 1 :  01010101  =  ?', 'success');
-  addLine('   >>>  CLE 2 :  00110011  =  ?', 'success');
-  addLine('   >>>  CLE 3 :  01100110  =  ?', 'success');
-  addLine('', '');
-  addLine('  COMMANDE : sum <total>', 'info');
-  stage = 'game3';
-  promptEl.textContent = 'hacker@vault:~$';
-  showInput();
-}
-
-async function finalHackSuccess(){
-  hideInput();
-  await glitchBurst(8, 50);
-  await typeLine('[CRITIQUE] Acces manager Fleeca obtenu...', 'warning', 14);
-  await sleep(300);
-  await typeLine('[SYSTEME] Redirection vers l\'application Fleeca...', 'info', 14);
-  await sleep(500);
-  for (const p of [25,50,75,100]){
-    addLine('[REDIRECT] '+p+'%  '+'#'.repeat(Math.floor(p/5)), 'info');
-    await sleep(200);
-  }
-  await sleep(400);
-  addLine('[SYSTEME] Une derniere etape t\'attend dans l\'app...', 'success');
-  await sleep(800);
-  // Transition back to phone
-  beep(1500, 0.2, 'sine', 0.05);
-  await glitchTransition();
-  document.getElementById('terminal-overlay').classList.remove('show');
-  document.getElementById('matrix-bg').classList.remove('show');
-  document.getElementById('phone').style.display = 'block';
-  showScreen('fleeca-admin');
-}
-
-async function handleCommand(raw){
-  const cmd = raw.trim();
-  addLine(promptEl.textContent + ' ' + cmd);
-  const c = cmd.toLowerCase();
-  if (!c) { showInput(); return; }
-
-  if (stage === 'menu'){
-    if (c === 'help'){
-      addLine('Commandes :', 'info');
-      addLine('  start  - commencer la mission', 'info');
-      addLine('  clear  - effacer l\'ecran', 'info');
-      addLine('  whoami - identite', 'info');
-    } else if (c === 'start'){ await startGame1(); return; }
-    else if (c === 'clear'){ output.innerHTML = ''; }
-    else if (c === 'whoami'){ addLine('hacker_anonyme_42 | ip: spoofed', 'success'); }
-    else { addLine('Commande inconnue : '+cmd, 'error'); addLine('Tape "help".', 'warning'); }
-  }
-  else if (stage === 'game1'){
-    if (c === 'help'){
-      addLine('Tape : decrypt <mot>', 'info');
-      addLine('Decale chaque lettre de KDFN de -3', 'info');
-      addLine('K->H, D->A, F->C, K->H', 'dim');
-    } else if (c === 'clear'){ output.innerHTML = ''; }
-    else if (c.startsWith('decrypt ')){
-      const ans = c.split(/\s+/)[1] || '';
-      if (ans === 'hack'){
-        beep(880, 0.15, 'sine', 0.05);
-        await glitchBurst(2, 50);
-        addLine('[ OK ] Decryptage reussi : KDFN -> HACK', 'success');
-        await sleep(400);
-        await startGame2();
-        return;
-      } else {
-        beep(200, 0.1, 'sawtooth', 0.04);
-        addLine('[ ERR ] Mauvais decryptage : "'+ans+'"', 'error');
-        addLine('Indice : K(-3)=H', 'warning');
-      }
-    } else { addLine('Commande inconnue. Utilise : decrypt <mot>', 'error'); }
-  }
-  else if (stage === 'game2'){
-    const seq = ['scan','connect','bypass','inject'];
-    const step = state.g2;
-    if (c === 'help'){
-      addLine('Sequence : scan -> connect -> bypass -> inject', 'info');
-      addLine('Etape '+step+'/4 -> tape "'+seq[step-1]+'"', 'info');
-    } else if (c === 'clear'){ output.innerHTML = ''; }
-    else if (c === seq[step-1]){
-      beep(700+step*100, 0.08, 'sine', 0.04);
-      if (step === 1){
-        addLine('[SCAN] nmap lance...', 'success');
-        addLine('[SCAN] Ports ouverts : 22, 80, 443, 8080, 31337', 'success');
-        addLine('>>> ETAPE 2/4 - tape "connect"', 'warning');
-      } else if (step === 2){
-        addLine('[CONNECT] Port 31337 ouvert', 'success');
-        addLine('[CONNECT] Reverse shell etabli !', 'success');
-        addLine('>>> ETAPE 3/4 - tape "bypass"', 'warning');
-      } else if (step === 3){
-        addLine('[BYPASS] Exploitation CVE-2024-XX42...', 'success');
-        addLine('[BYPASS] Firewall contourne, IDS off.', 'success');
-        addLine('>>> ETAPE 4/4 - tape "inject"', 'warning');
-      } else if (step === 4){
-        addLine('[INJECT] Injection payload (1024 octets)...', 'success');
-        addLine('[INJECT] Payload accepte !', 'success');
-        await sleep(400);
-        await startGame3();
-        return;
-      }
-      state.g2 = step + 1;
-    } else if (seq.includes(c)){
-      beep(200, 0.2, 'sawtooth', 0.05);
-      await glitchBurst(2, 50);
-      addLine('[ALERTE] Mauvais ordre ! Detecte.', 'error');
-      addLine('>>> ETAPE 1/4 - tape "scan"', 'warning');
-      state.g2 = 1;
-    } else { addLine('Commande inconnue : '+cmd, 'error'); }
-  }
-  else if (stage === 'game3'){
-    if (c === 'help'){
-      addLine('Convertis chaque binaire en decimal :', 'info');
-      addLine('  01010101 = 64+16+4+1', 'info');
-      addLine('  00110011 = 32+16+2+1', 'info');
-      addLine('  01100110 = 64+32+4+2', 'info');
-      addLine('Puis tape : sum <total>', 'info');
-    } else if (c === 'clear'){ output.innerHTML = ''; }
-    else if (c.startsWith('sum ')){
-      const ans = parseInt(c.split(/\s+/)[1]);
-      if (ans === 238){
-        beep(1200, 0.2, 'sine', 0.05);
-        addLine('[ OK ] Calcul correct : 85 + 51 + 102 = 238', 'success');
-        await sleep(500);
-        await finalHackSuccess();
-        return;
-      } else if (isNaN(ans)){
-        addLine('[ ERR ] Format invalide. sum <nombre>', 'error');
-      } else {
-        beep(200, 0.1, 'sawtooth', 0.04);
-        addLine('[ ERR ] Mauvais total : '+ans, 'error');
-        addLine('Recalcule.', 'warning');
-      }
-    } else { addLine('Commande inconnue. sum <total>', 'error'); }
-  }
-  showInput();
-}
-
-cmdInput.addEventListener('keydown', async (e) => {
-  if (e.key === 'Enter'){
-    const v = cmdInput.value;
-    if (!v.trim()) return;
-    hideInput();
-    await handleCommand(v);
-  }
+// DIGIT INPUTS
+const digits=document.querySelectorAll('.code-digit');
+digits.forEach((d,i)=>{
+  d.addEventListener('input',e=>{
+    const v=e.target.value.replace(/\D/g,'');
+    e.target.value=v.slice(-1);
+    if(v&&i<digits.length-1)digits[i+1].focus();
+    clearError();
+  });
+  d.addEventListener('keydown',e=>{
+    if(e.key==='Backspace'&&!d.value&&i>0)digits[i-1].focus();
+    if(e.key==='Enter')tryUnlock();
+  });
+  d.addEventListener('paste',e=>{
+    e.preventDefault();
+    const p=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'');
+    p.split('').slice(0,10).forEach((ch,j)=>{if(digits[i+j])digits[i+j].value=ch;});
+    digits[Math.min(i+p.length,digits.length-1)].focus();
+  });
 });
 
-// Fake codes pendant les attentes
-setInterval(()=>{
-  if (stage !== 'boot' && !inputLine.classList.contains('hidden') && Math.random() < 0.05){
-    const d = document.createElement('div');
-    d.className = 'line dim';
-    d.textContent = fakeCodes[Math.floor(Math.random()*fakeCodes.length)];
-    output.insertBefore(d, inputLine);
-    scrollDown();
-  }
-}, 2500);
-
-/* ============================================================
-   BYPASS MINI-JEU FINAL
-============================================================ */
-const BAR_WIDTH = 316; // px utile (380 - padding/border)
-const bypassBar = document.getElementById('bypass-bar');
-const bypassZone = document.getElementById('bypass-zone');
-const bypassIndicator = document.getElementById('bypass-indicator');
-const bypassRoundInfo = document.getElementById('bypass-round-info');
-const bypassStop = document.getElementById('bypass-stop');
-const bypassProgress = document.getElementById('bypass-progress');
-
-let bypassPos = 0, bypassDir = 1, bypassSpeed = 200;
-let bypassZoneStart = 0, bypassZoneWidth = 80;
-let bypassRoundNum = 1;
-let bypassAnim = null, bypassLastT = 0, bypassRunning = false;
-
-const ROUNDS = [
-  { zoneWidth: 90, speed: 240 },
-  { zoneWidth: 65, speed: 320 },
-  { zoneWidth: 42, speed: 430 },
-];
-
-function startBypassGame(){
-  bypassRoundNum = 1;
-  updateBypassDots();
-  showScreen('fleeca-bypass');
-  setTimeout(startBypassRound, 400);
+function clearError(){
+  digits.forEach(d=>d.classList.remove('error'));
+  document.getElementById('error-msg').textContent='';
 }
 
-function updateBypassDots(){
-  const dots = bypassProgress.querySelectorAll('.bypass-dot');
-  dots.forEach((d, i) => {
-    d.classList.remove('done','current');
-    if (i < bypassRoundNum - 1) d.classList.add('done');
-    else if (i === bypassRoundNum - 1) d.classList.add('current');
+const SECRET='4875250000';
+function tryUnlock(){
+  const entered=Array.from(digits).map(d=>d.value).join('');
+  if(entered.length<10){document.getElementById('error-msg').textContent='⚠ Code incomplet — 10 chiffres requis';return;}
+  if(entered===SECRET){
+    document.getElementById('lock-screen').style.display='none';
+    document.getElementById('finance-content').classList.add('visible');
+    document.getElementById('tab-secret').classList.add('visible');
+  } else {
+    digits.forEach(d=>d.classList.add('error'));
+    document.getElementById('error-msg').textContent='✕ Code incorrect — accès refusé';
+    setTimeout(()=>{
+      digits.forEach(d=>{d.classList.remove('error');d.value='';});
+      document.getElementById('error-msg').textContent='';
+      digits[0].focus();
+    },1500);
+  }
+}
+
+function lockFinances(){
+  document.getElementById('lock-screen').style.display='flex';
+  document.getElementById('finance-content').classList.remove('visible');
+  digits.forEach(d=>d.value='');
+  clearError();
+  document.getElementById('tab-secret').classList.remove('visible');
+  if(document.getElementById('panel-secret').classList.contains('active'))switchTab('dashboard');
+  // reset minigame unlocks
+  secretUnlocked=false;bankUnlocked=false;illegalDetailsUnlocked=false;
+  const grid=document.getElementById('illegal-grid');
+  if(grid)grid.classList.add('illegal-locked');
+  const banner=document.getElementById('illegal-banner');
+  if(banner)banner.style.display='';
+  // re-redact
+  document.querySelectorAll('.redacted.revealed').forEach(el=>{
+    el.classList.remove('revealed');
+    el.textContent='█'.repeat(el.dataset.original?el.dataset.original.length:el.textContent.length);
   });
 }
 
-function startBypassRound(){
-  const W = bypassBar.clientWidth;
-  const cfg = ROUNDS[bypassRoundNum - 1];
-  bypassZoneWidth = cfg.zoneWidth;
-  bypassSpeed = cfg.speed;
-  bypassZoneStart = 20 + Math.random() * (W - 40 - cfg.zoneWidth);
-  bypassZone.style.left = bypassZoneStart + 'px';
-  bypassZone.style.width = bypassZoneWidth + 'px';
-  bypassPos = 0; bypassDir = 1;
-  bypassRunning = true;
-  bypassLastT = performance.now();
-  bypassRoundInfo.textContent = 'MANCHE '+bypassRoundNum+' / 3';
-  updateBypassDots();
-  requestAnimationFrame(animBypass);
+// REDACT REVEAL
+function reveal(el,value){
+  const inBank=el.closest('.bank-card');
+  if(inBank&&!bankUnlocked){
+    startEngineGame(()=>{
+      bankUnlocked=true;
+      document.querySelectorAll('.bank-card .redacted').forEach(p=>{
+        if(!p.classList.contains('revealed'))p.click();
+      });
+    });
+    return;
+  }
+  if(el.classList.contains('revealed'))return;
+  if(!el.dataset.original)el.dataset.original=value;
+  el.textContent=value;
+  el.classList.add('revealed');
+}
+function unlockIllegalDetails(){
+  illegalDetailsUnlocked=true;
+  document.getElementById('illegal-grid').classList.remove('illegal-locked');
+  document.getElementById('illegal-banner').style.display='none';
 }
 
-function animBypass(t){
-  if (!bypassRunning) return;
-  const W = bypassBar.clientWidth;
-  const dt = (t - bypassLastT) / 1000;
-  bypassLastT = t;
-  bypassPos += bypassDir * bypassSpeed * dt;
-  if (bypassPos > W){ bypassPos = W; bypassDir = -1; }
-  if (bypassPos < 0){ bypassPos = 0; bypassDir = 1; }
-  bypassIndicator.style.left = bypassPos + 'px';
-  bypassAnim = requestAnimationFrame(animBypass);
-}
+// === MINIGAMES ===
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
-bypassStop.addEventListener('click', () => {
-  if (!bypassRunning) return;
-  bypassRunning = false;
-  cancelAnimationFrame(bypassAnim);
-  const inZone = bypassPos >= bypassZoneStart && bypassPos <= bypassZoneStart + bypassZoneWidth;
-  if (inZone){
-    beep(1000 + bypassRoundNum*200, 0.15, 'sine', 0.05);
-    bypassIndicator.style.background = '#22c55e';
-    bypassIndicator.style.boxShadow = '0 0 14px #22c55e';
-    if (bypassRoundNum >= 3){
-      setTimeout(showVaultCode, 700);
-    } else {
-      bypassRoundNum++;
-      setTimeout(()=>{
-        bypassIndicator.style.background = '#ef4444';
-        bypassIndicator.style.boxShadow = '0 0 10px #ef4444, 0 0 20px rgba(239,68,68,0.5)';
-        startBypassRound();
-      }, 600);
+// WIRE GAME
+const WIRE_DATA=[{name:'ROUGE',color:'#e84a4a'},{name:'BLEU',color:'#4a9ae8'},{name:'VERT',color:'#4ae89a'},{name:'JAUNE',color:'#e8c94a'}];
+let wireSelected=null;let wireCallback=null;
+function startWireGame(cb){
+  wireCallback=cb;wireSelected=null;
+  const left=document.getElementById('wire-left');const right=document.getElementById('wire-right');
+  left.innerHTML='';right.innerHTML='';
+  WIRE_DATA.forEach(w=>{
+    const pin=document.createElement('div');
+    pin.className='wire-pin';pin.style.borderColor=w.color;pin.style.color=w.color;
+    pin.dataset.color=w.color;pin.dataset.side='left';pin.textContent=w.name;
+    pin.onclick=()=>selectWire(pin);left.appendChild(pin);
+  });
+  shuffle(WIRE_DATA).forEach(w=>{
+    const pin=document.createElement('div');
+    pin.className='wire-pin socket';pin.style.borderColor=w.color;pin.style.color=w.color;
+    pin.dataset.color=w.color;pin.dataset.side='right';pin.textContent='○';
+    pin.onclick=()=>selectWire(pin);right.appendChild(pin);
+  });
+  document.getElementById('wire-status').textContent='Sélectionne un fil...';
+  document.getElementById('wire-modal').classList.add('open');
+}
+function selectWire(pin){
+  if(pin.classList.contains('connected'))return;
+  if(!wireSelected){wireSelected=pin;pin.classList.add('selected');return;}
+  if(wireSelected.dataset.side===pin.dataset.side){
+    wireSelected.classList.remove('selected');wireSelected=pin;pin.classList.add('selected');return;
+  }
+  if(wireSelected.dataset.color===pin.dataset.color){
+    wireSelected.classList.remove('selected');
+    wireSelected.classList.add('connected');pin.classList.add('connected');pin.textContent='●';
+    wireSelected=null;
+    const total=document.querySelectorAll('#wire-left .wire-pin').length;
+    const done=document.querySelectorAll('#wire-left .connected').length;
+    document.getElementById('wire-status').textContent=`✓ ${done}/${total} connectés`;
+    if(done===total){
+      document.getElementById('wire-status').textContent='✓ Sécurité bypassée!';
+      setTimeout(()=>{document.getElementById('wire-modal').classList.remove('open');if(wireCallback)wireCallback();},800);
     }
   } else {
-    triggerAlarm();
+    const a=wireSelected,b=pin;
+    a.classList.add('error');b.classList.add('error');
+    document.getElementById('wire-status').textContent='✕ Mauvaise couleur!';
+    setTimeout(()=>{a.classList.remove('error','selected');b.classList.remove('error');wireSelected=null;document.getElementById('wire-status').textContent='Sélectionne un fil...';},700);
   }
-});
-
-function showVaultCode(){
-  const t = new Date();
-  document.querySelector('#success-time span').textContent =
-    String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0')+':'+String(t.getSeconds()).padStart(2,'0');
-  showScreen('fleeca-success');
-  beep(523, 0.15, 'sine', 0.05);
-  setTimeout(()=>beep(659, 0.15, 'sine', 0.05), 150);
-  setTimeout(()=>beep(784, 0.4, 'sine', 0.05), 300);
 }
 
-/* ============================================================
-   ALARME (game over)
-============================================================ */
-function triggerAlarm(){
-  alarmSiren();
-  const al = document.getElementById('alarm-screen');
-  al.classList.add('show');
-  const cd = document.getElementById('alarm-countdown');
-  let n = 3;
-  cd.textContent = 'RESET DANS '+n+'...';
-  const iv = setInterval(()=>{
-    n--;
-    if (n <= 0){
-      clearInterval(iv);
-      al.classList.remove('show');
-      resetAll();
-    } else {
-      cd.textContent = 'RESET DANS '+n+'...';
+// PAINT GAME
+const PAINT_COLORS=[
+  {name:'Rouge Carmin',hex:'#c41e3a'},{name:'Bleu Nuit',hex:'#1a3a6e'},
+  {name:'Vert Forêt',hex:'#2d5a3a'},{name:'Jaune Or',hex:'#d4a017'},
+  {name:'Pourpre Royal',hex:'#6a1b9a'},{name:'Orange Brûlé',hex:'#cc4f1f'},
+];
+let paintTarget=null,paintProgress=0,paintCallback=null,paintBusy=false;
+function startPaintGame(cb){paintProgress=0;paintCallback=cb;paintBusy=false;document.getElementById('paint-modal').classList.add('open');updatePaintProgress();nextPaintRound();}
+function nextPaintRound(){
+  if(paintProgress>=5){
+    document.getElementById('paint-status').textContent='✓ Teintes validées!';
+    setTimeout(()=>{document.getElementById('paint-modal').classList.remove('open');if(paintCallback)paintCallback();},800);
+    return;
+  }
+  paintTarget=PAINT_COLORS[Math.floor(Math.random()*PAINT_COLORS.length)];
+  document.getElementById('paint-target').style.background=paintTarget.hex;
+  document.getElementById('paint-target-name').textContent=paintTarget.name;
+  const grid=document.getElementById('paint-grid');grid.innerHTML='';
+  shuffle(PAINT_COLORS).forEach(c=>{
+    const btn=document.createElement('button');
+    btn.className='paint-btn';btn.style.background=c.hex;btn.title=c.name;
+    btn.onclick=()=>{
+      if(paintBusy)return;paintBusy=true;
+      if(c.hex===paintTarget.hex){
+        paintProgress++;updatePaintProgress();
+        document.getElementById('paint-status').textContent=`✓ Match! (${paintProgress}/5)`;
+        setTimeout(()=>{paintBusy=false;nextPaintRound();},350);
+      } else {
+        document.getElementById('paint-status').textContent='✕ Mauvaise teinte! Recommencer.';
+        paintProgress=0;updatePaintProgress();
+        setTimeout(()=>{paintBusy=false;nextPaintRound();},900);
+      }
+    };
+    grid.appendChild(btn);
+  });
+  document.getElementById('paint-status').textContent='Trouve la teinte cible';
+}
+function updatePaintProgress(){
+  document.querySelectorAll('#paint-progress .mg-progress-dot').forEach((d,i)=>d.classList.toggle('filled',i<paintProgress));
+}
+
+// ENGINE GAME
+let engNeedle=0,engDir=1,engSpeed=1.5,engProgress=0,engInterval=null,engCallback=null;
+function startEngineGame(cb){
+  engNeedle=0;engDir=1;engSpeed=1.5;engProgress=0;engCallback=cb;
+  document.getElementById('engine-status').textContent="Clique IGNITE quand l'aiguille est dans la zone verte";
+  updateEngineProgress();
+  document.getElementById('engine-modal').classList.add('open');
+  if(engInterval)clearInterval(engInterval);
+  engInterval=setInterval(()=>{
+    engNeedle+=engDir*engSpeed;
+    if(engNeedle>=100){engNeedle=100;engDir=-1;}
+    if(engNeedle<=0){engNeedle=0;engDir=1;}
+    document.getElementById('engine-needle').style.left=engNeedle+'%';
+    document.getElementById('engine-rpm').textContent=Math.round(engNeedle*100)+' RPM';
+  },16);
+}
+function igniteEngine(){
+  if(engNeedle>=42&&engNeedle<=60){
+    engProgress++;engSpeed+=0.7;
+    document.getElementById('engine-status').textContent=`✓ Vroom! (${engProgress}/3)`;
+    if(engProgress>=3){
+      clearInterval(engInterval);
+      document.getElementById('engine-status').textContent='✓ Moteur démarré!';
+      setTimeout(()=>{document.getElementById('engine-modal').classList.remove('open');if(engCallback)engCallback();},800);
     }
-  }, 1000);
-}
-
-/* ============================================================
-   RESET COMPLET
-============================================================ */
-function resetAll(){
-  state = {};
-  stage = 'boot';
-  output.innerHTML = '';
-  document.getElementById('terminal-overlay').classList.remove('show');
-  document.getElementById('matrix-bg').classList.remove('show');
-  document.getElementById('intro-screen').classList.remove('show');
-  document.getElementById('phone').style.display = 'block';
-  bypassIndicator.style.background = '#ef4444';
-  bypassIndicator.style.boxShadow = '0 0 10px #ef4444, 0 0 20px rgba(239,68,68,0.5)';
-  showScreen('home-screen');
-}
-
-// Click anywhere on terminal area focuses input
-document.addEventListener('click', (e) => {
-  if (document.getElementById('terminal-overlay').classList.contains('show') &&
-      !inputLine.classList.contains('hidden')){
-    cmdInput.focus();
+  } else {
+    engProgress=0;engSpeed=1.5;
+    document.getElementById('engine-status').textContent='✕ Calé! Recommence.';
   }
-});
+  updateEngineProgress();
+}
+function updateEngineProgress(){
+  document.querySelectorAll('#engine-progress .mg-progress-dot').forEach((d,i)=>d.classList.toggle('filled',i<engProgress));
+}
+function cancelMG(name){
+  document.getElementById(name+'-modal').classList.remove('open');
+  if(name==='engine'&&engInterval)clearInterval(engInterval);
+}
+
+// EMPLOYEE DATA
+const employees={
+  'zoe-connor':{name:'Zoé Connor',initials:'ZC',avatarClass:'gold',role:'PDG',post:'Présidente Directrice Générale',date:'12/03/2019',spec:'Direction stratégique, Relations VIP',status:'Actif — Fondatrice',sales:18,revenue:'$584 000',commission:'Dividendes',satisfaction:'N/A',days:[60,90,75,100,80,95],salary:'Dividendes',total:'$584 000 + parts',contract:'Fondatrice / Actionnaire majoritaire',badgeColor:'#e8c94a',badgeBg:'rgba(232,201,74,0.1)'},
+  'issac-croover':{name:'Issac Croover',initials:'IC',avatarClass:'gold',role:'Co-PDG',post:'Co-Président Directeur Général',date:'01/07/2020',spec:'Développement commercial, Partenariats',status:'Actif',sales:12,revenue:'$412 000',commission:'Dividendes',satisfaction:'N/A',days:[50,80,60,90,70,85],salary:'Dividendes',total:'$412 000 + parts',contract:'Co-fondateur / Actionnaire',badgeColor:'#c9a32a',badgeBg:'rgba(201,163,42,0.1)'},
+  'antonio-spart':{name:'Antonio Spart',initials:'AS',avatarClass:'blue',role:'DRH',post:'Directeur des Ressources Humaines',date:'15/09/2021',spec:'Recrutement, Gestion des conflits',status:'Actif',sales:0,revenue:'$0',commission:'$0',satisfaction:'99%',days:[0,0,0,0,0,0],salary:'$28 000',total:'$28 000',contract:'CDI cadre',badgeColor:'#4a9ae8',badgeBg:'rgba(74,154,232,0.1)'},
+  'nash-dawkins':{name:'Nash Dawkins',initials:'ND',avatarClass:'blue',role:'DRH',post:'Directeur des Ressources Humaines',date:'03/02/2022',spec:'Formation, Droit du travail',status:'Actif',sales:0,revenue:'$0',commission:'$0',satisfaction:'97%',days:[0,0,0,0,0,0],salary:'$26 000',total:'$26 000',contract:'CDI cadre',badgeColor:'#4a9ae8',badgeBg:'rgba(74,154,232,0.1)'},
+  'lucas-plaque':{name:'Lucas Plaque',initials:'LP',avatarClass:'green',role:"Chef d'équipe",post:"Chef d'équipe atelier",date:'20/11/2021',spec:'Supervision, Contrôle qualité',status:'Actif',sales:38,revenue:'$458 200',commission:'$45 820',satisfaction:'99.1%',days:[80,95,70,100,88,100],salary:'$35 000',total:'$80 820',contract:'CDI',badgeColor:'#4ae89a',badgeBg:'rgba(74,232,154,0.1)'},
+  'diego-sanshez':{name:'Diego Sanshez',initials:'DS',avatarClass:'purple',role:'CDI',post:'Technicien carrosserie senior',date:'11/01/2022',spec:'Carrosserie, Peinture custom',status:'Actif',sales:19,revenue:'$224 800',commission:'$22 480',satisfaction:'98.4%',days:[60,75,50,85,70,90],salary:'$22 000',total:'$44 480',contract:'CDI',badgeColor:'#7a7aff',badgeBg:'rgba(122,122,255,0.1)'},
+  'jack-mericine':{name:'Jack Mericine',initials:'JM',avatarClass:'purple',role:'CDI',post:'Mécanicien moteur',date:'08/04/2022',spec:'Préparation moteur, Turbo',status:'Actif',sales:24,revenue:'$298 600',commission:'$29 860',satisfaction:'97.8%',days:[70,85,60,90,80,75],salary:'$22 000',total:'$51 860',contract:'CDI',badgeColor:'#7a7aff',badgeBg:'rgba(122,122,255,0.1)'},
+  'liza-devil':{name:'Liza Devil',initials:'LD',avatarClass:'purple',role:'CDI',post:'Technicienne intérieur & sellerie',date:'22/06/2022',spec:'Intérieur sur mesure, Sellerie',status:'Actif',sales:22,revenue:'$268 400',commission:'$26 840',satisfaction:'99.3%',days:[65,80,55,88,75,85],salary:'$22 000',total:'$48 840',contract:'CDI',badgeColor:'#7a7aff',badgeBg:'rgba(122,122,255,0.1)'},
+  'marlon-smith':{name:'Marlon Smith',initials:'MS',avatarClass:'purple',role:'CDI',post:'Technicien polyvalent',date:'14/08/2022',spec:'Tuning complet, Jantes',status:'Actif',sales:18,revenue:'$202 200',commission:'$20 220',satisfaction:'96.5%',days:[55,70,48,80,65,70],salary:'$22 000',total:'$42 220',contract:'CDI',badgeColor:'#7a7aff',badgeBg:'rgba(122,122,255,0.1)'},
+  'roy-koenigsegg':{name:'Roy Koenigsegg',initials:'RK',avatarClass:'purple',role:'CDI',post:'Technicien performance',date:'30/09/2022',spec:'Moteurs hautes performances',status:'Actif',sales:31,revenue:'$398 500',commission:'$39 850',satisfaction:'98.9%',days:[75,90,65,95,82,92],salary:'$24 000',total:'$63 850',contract:'CDI',badgeColor:'#7a7aff',badgeBg:'rgba(122,122,255,0.1)'},
+  'sophia-portmann':{name:'Sophia Portmann',initials:'SP',avatarClass:'purple',role:'CDI',post:'Designer & relation client VIP',date:'12/12/2022',spec:'Design esthétique, Accueil VIP',status:'Actif',sales:27,revenue:'$342 800',commission:'$34 280',satisfaction:'99.7%',days:[72,88,62,92,80,90],salary:'$23 000',total:'$57 280',contract:'CDI',badgeColor:'#7a7aff',badgeBg:'rgba(122,122,255,0.1)'},
+  'tao-ska':{name:'Tao Ska',initials:'TS',avatarClass:'purple',role:'CDI',post:'Technicien électronique & multimédia',date:'05/03/2023',spec:'Audio, GPS, Électronique',status:'Actif',sales:16,revenue:'$174 500',commission:'$17 450',satisfaction:'97.2%',days:[50,65,42,72,58,68],salary:'$22 000',total:'$39 450',contract:'CDI',badgeColor:'#7a7aff',badgeBg:'rgba(122,122,255,0.1)'},
+  'thomas-jones':{name:'Thomas Jones',initials:'TJ',avatarClass:'purple',role:'CDI',post:'Technicien carrosserie',date:'19/05/2023',spec:'Carrosserie, Aérodynamique',status:'Actif',sales:14,revenue:'$158 800',commission:'$15 880',satisfaction:'96.8%',days:[45,60,38,68,55,62],salary:'$22 000',total:'$37 880',contract:'CDI',badgeColor:'#7a7aff',badgeBg:'rgba(122,122,255,0.1)'},
+  'zay-foncesca':{name:'Zay Foncesca Villaseñor de Castillo Vásquez',initials:'ZF',avatarClass:'purple',role:'CDI',post:'Technicien blindage & sécurité',date:'07/09/2023',spec:'Blindage, Protection balistique',status:'Actif',sales:9,revenue:'$148 700',commission:'$14 870',satisfaction:'99.0%',days:[40,55,35,65,50,58],salary:'$25 000',total:'$39 870',contract:'CDI',badgeColor:'#7a7aff',badgeBg:'rgba(122,122,255,0.1)'},
+  'alessio-mendez':{name:'Alessio Mendez',initials:'AM',avatarClass:'gray',role:'CDD',post:'Technicien peinture confirmé',date:'01/02/2025',spec:'Peinture de base',status:'Actif — CDD 6 mois',sales:8,revenue:'$72 400',commission:'$7 240',satisfaction:'95.0%',days:[30,45,28,52,40,48],salary:'$15 000',total:'$22 240',contract:'CDD 6 mois',badgeColor:'#555b70',badgeBg:'rgba(85,91,112,0.15)'},
+  'alvaro-martinez':{name:'Alvaro Martinez',initials:'AM',avatarClass:'gray',role:'CDD',post:'Assistant mécanicien',date:'15/01/2025',spec:'Assistance atelier',status:'Actif — CDD 3 mois',sales:6,revenue:'$54 200',commission:'$5 420',satisfaction:'94.5%',days:[25,38,22,44,34,40],salary:'$13 500',total:'$18 920',contract:'CDD 3 mois',badgeColor:'#555b70',badgeBg:'rgba(85,91,112,0.15)'},
+  'diego-hernandez':{name:'Diego Hernandez',initials:'DH',avatarClass:'gray',role:'CDD',post:'Préparation véhicules',date:'10/03/2025',spec:'Préparation livraison',status:'Actif — CDD 3 mois',sales:4,revenue:'$32 800',commission:'$3 280',satisfaction:'93.0%',days:[20,30,18,35,25,32],salary:'$12 000',total:'$15 280',contract:'CDD 3 mois',badgeColor:'#555b70',badgeBg:'rgba(85,91,112,0.15)'},
+  'fernando-baca':{name:'Fernando Baca',initials:'FB',avatarClass:'gray',role:'CDD',post:'Technicien jantes',date:'20/02/2025',spec:'Montage jantes & pneus',status:'Actif — CDD 6 mois',sales:11,revenue:'$94 200',commission:'$9 420',satisfaction:'96.2%',days:[35,50,30,58,44,52],salary:'$14 000',total:'$23 420',contract:'CDD 6 mois',badgeColor:'#555b70',badgeBg:'rgba(85,91,112,0.15)'},
+  'gusto-silva':{name:'Gusto Silva',initials:'GS',avatarClass:'gray',role:'CDD',post:'Assistant peinture',date:'01/04/2025',spec:'Peinture basique, Ponçage',status:'Actif — CDD 3 mois',sales:5,revenue:'$42 000',commission:'$4 200',satisfaction:'94.0%',days:[22,34,20,40,28,36],salary:'$13 000',total:'$17 200',contract:'CDD 3 mois',badgeColor:'#555b70',badgeBg:'rgba(85,91,112,0.15)'},
+  'kash-salvatore':{name:'Kash Salvatore',initials:'KS',avatarClass:'gray',role:'CDD',post:'Technicien spécialisé — discret',date:'11/11/2024',spec:'Blindage, Modifications discrètes',status:'Actif — renouvellement prévu',sales:10,revenue:'$121 500',commission:'$12 150',satisfaction:'97.8%',days:[40,58,35,65,50,60],salary:'$18 000',total:'$30 150',contract:'CDD renouvelable',badgeColor:'#555b70',badgeBg:'rgba(85,91,112,0.15)'},
+  'paco-valdez':{name:'Paco Valdez',initials:'PV',avatarClass:'gray',role:'CDD',post:'Chauffeur livraison',date:'01/03/2025',spec:'Transfert véhicules',status:'Actif — CDD 6 mois',sales:3,revenue:'$24 200',commission:'$2 420',satisfaction:'92.0%',days:[18,26,15,30,22,28],salary:'$12 500',total:'$14 920',contract:'CDD 6 mois',badgeColor:'#555b70',badgeBg:'rgba(85,91,112,0.15)'},
+  'pepe-garcia':{name:'Pepe Garcia',initials:'PG',avatarClass:'gray',role:'CDD',post:'Accueil & caisse',date:'15/02/2025',spec:'Accueil client, Encaissement',status:'Actif — CDD 3 mois',sales:7,revenue:'$62 800',commission:'$6 280',satisfaction:'95.5%',days:[28,42,24,48,36,44],salary:'$13 500',total:'$20 080',contract:'CDD 3 mois',badgeColor:'#555b70',badgeBg:'rgba(85,91,112,0.15)'},
+};
+
+function openModal(id){
+  const e=employees[id];if(!e)return;
+  document.getElementById('m-avatar').textContent=e.initials;
+  document.getElementById('m-avatar').className='modal-avatar '+e.avatarClass;
+  document.getElementById('m-name').textContent=e.name;
+  document.getElementById('m-badge').textContent=e.role;
+  document.getElementById('m-badge').style.cssText=`color:${e.badgeColor};background:${e.badgeBg};border:1px solid ${e.badgeColor}40;font-family:var(--mono);font-size:10px;letter-spacing:2px;padding:3px 10px;display:inline-block;margin-top:6px;`;
+  document.getElementById('m-post').textContent=e.post;
+  document.getElementById('m-date').textContent=e.date;
+  document.getElementById('m-spec').textContent=e.spec;
+  document.getElementById('m-status').textContent=e.status;
+  document.getElementById('m-sales').textContent=e.sales+' commandes';
+  document.getElementById('m-revenue').textContent=e.revenue;
+  document.getElementById('m-commission').textContent=e.commission;
+  document.getElementById('m-satisfaction').textContent=e.satisfaction;
+  document.getElementById('m-salary').textContent=e.salary;
+  document.getElementById('m-total').textContent=e.total;
+  document.getElementById('m-contract').textContent=e.contract;
+  const max=Math.max(...e.days)||1;
+  for(let i=1;i<=6;i++){
+    const pct=Math.round(e.days[i-1]/max*100);
+    document.getElementById('m-d'+i).style.width=pct+'%';
+    document.getElementById('m-d'+i+'v').textContent=e.days[i-1]>0?e.days[i-1]+' ventes':'repos';
+  }
+  document.getElementById('emp-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(){
+  document.getElementById('emp-modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+function closeModalOutside(e){if(e.target.id==='emp-modal')closeModal();}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 </script>
 </body>
 </html>
