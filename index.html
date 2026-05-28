@@ -330,6 +330,75 @@ body{
 .term-c-muted{color:var(--muted);}
 .term-c-red{color:var(--red);}
 
+.mg-timer{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--gold);text-align:center;margin:6px 0 14px;letter-spacing:2px;}
+.mg-timer.warning{color:var(--red);animation:pulse 0.6s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.45;}}
+.seq-slots{display:flex;justify-content:center;gap:8px;margin-bottom:14px;}
+.seq-slot{width:46px;height:46px;border-radius:8px;border:2px solid var(--border2);background:rgba(255,255,255,0.04);transition:background 0.2s,border-color 0.2s;}
+.seq-slot.filled{box-shadow:0 0 8px currentColor;}
+.seq-slot.flash-err{animation:shakeErr 0.4s;}
+@keyframes shakeErr{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+
+.illegal-alert{background:rgba(255,90,90,0.1);border:1px solid rgba(255,90,90,0.4);border-radius:10px;padding:14px 18px;margin-bottom:1.5rem;display:flex;align-items:center;gap:14px;}
+.illegal-alert:not(.done):not(.fail){animation:alertPulse 2s infinite;}
+@keyframes alertPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,90,90,0.15);}50%{box-shadow:0 0 18px 0 rgba(255,90,90,0.25);}}
+.illegal-alert.done{background:rgba(61,220,132,0.08);border-color:rgba(61,220,132,0.35);}
+.illegal-alert.fail{background:rgba(255,90,90,0.2);border-color:rgba(255,90,90,0.6);}
+.illegal-alert-i{font-size:24px;flex-shrink:0;}
+.illegal-alert-c{flex:1;}
+.illegal-alert-t{font-weight:800;font-size:14px;color:var(--red);margin-bottom:4px;letter-spacing:0.5px;}
+.illegal-alert.done .illegal-alert-t{color:var(--green);}
+.illegal-alert-d{font-family:var(--mono);font-size:11px;color:var(--text2);line-height:1.6;}
+.illegal-timer{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--red);min-width:78px;text-align:center;letter-spacing:1px;}
+.illegal-timer.warning{animation:pulse 0.6s infinite;}
+
+.ill.compromised{border-color:var(--red);box-shadow:0 0 14px rgba(255,90,90,0.18);position:relative;}
+.ill.compromised::before{content:'⚠ VIN À RETIRER MANUELLEMENT';display:block;background:var(--red);color:#fff;font-family:var(--mono);font-size:9px;letter-spacing:1.5px;padding:5px 10px;margin:-16px -16px 12px;border-radius:9px 9px 0 0;text-align:center;font-weight:700;}
+.vin-remove-btn{padding:4px 10px;background:var(--red);color:#fff;border:none;border-radius:5px;font-family:var(--mono);font-size:9px;letter-spacing:0.5px;cursor:pointer;text-transform:uppercase;font-weight:600;}
+.vin-remove-btn:hover:not(:disabled){background:#e04545;}
+.vin-remove-btn:disabled{background:rgba(61,220,132,0.2);color:var(--green);cursor:default;}
+.vin-removed{text-decoration:line-through;color:var(--muted) !important;opacity:0.6;}
+
+.illegal-restart-wrap{text-align:center;margin-top:1rem;}
+.illegal-restart-btn{padding:9px 24px;background:var(--purple);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;}
+.illegal-restart-btn:hover{opacity:0.88;}
+
+/* Scan banner & VIN status */
+.scan-banner{background:rgba(10,132,255,0.06);border:1px solid rgba(10,132,255,0.3);border-radius:10px;padding:14px 18px;margin-bottom:1.5rem;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.scan-banner.done{background:rgba(61,220,132,0.06);border-color:rgba(61,220,132,0.3);}
+.scan-banner-i{font-size:24px;flex-shrink:0;}
+.scan-banner-c{flex:1;min-width:200px;}
+.scan-banner-t{font-weight:800;font-size:14px;color:var(--blue);margin-bottom:4px;}
+.scan-banner.done .scan-banner-t{color:var(--green);}
+.scan-banner-d{font-family:var(--mono);font-size:11px;color:var(--text2);line-height:1.6;}
+.scan-banner-btn{padding:10px 22px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:12px;letter-spacing:1.5px;cursor:pointer;flex-shrink:0;text-transform:uppercase;}
+.scan-banner-btn:hover{opacity:0.88;}
+.scan-banner-btn:disabled{background:var(--muted);cursor:default;}
+
+/* Locked car state */
+#lp-illegal.scan-locked .ill::before{display:none !important;}
+#lp-illegal.scan-locked .ill > *:not(.ill-h){display:none;}
+#lp-illegal.scan-locked .ill::after{content:'🔒 NON SCANNÉ — lance le scan pour révéler';display:block;font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;padding:14px;border-top:1px dashed var(--border);margin-top:10px;letter-spacing:1px;}
+#lp-illegal.scan-locked .ill.compromised{border-color:var(--border);box-shadow:none;}
+#lp-illegal.scan-locked .ill.clean{border-color:var(--border);}
+#lp-illegal.scan-locked .divider.p{display:none;}
+#lp-illegal.scan-locked .clients{display:none;}
+
+/* Clean VIN badge */
+.ill.clean{border-color:rgba(61,220,132,0.3);box-shadow:0 0 12px rgba(61,220,132,0.08);}
+.ill.clean::before{content:'✓ VIN VALIDE — À CONSERVER';display:block;background:var(--green);color:#000;font-family:var(--mono);font-size:9px;letter-spacing:1.5px;padding:5px 10px;margin:-16px -16px 12px;border-radius:9px 9px 0 0;text-align:center;font-weight:700;}
+
+/* Hide old remove buttons */
+.vin-remove-btn{display:none !important;}
+
+/* Memory game */
+.mem-grid{display:grid;grid-template-columns:repeat(4,64px);gap:8px;justify-content:center;margin:0.5rem auto;}
+.mem-card{height:64px;background:rgba(10,18,40,0.8);border:1px solid var(--border2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;color:transparent;transition:all 0.25s;user-select:none;}
+.mem-card:hover:not(.flip):not(.match){border-color:var(--blue);transform:scale(1.04);}
+.mem-card.flip{background:rgba(10,132,255,0.15);border-color:var(--blue);color:var(--text);}
+.mem-card.match{background:rgba(61,220,132,0.12);border-color:var(--green);color:var(--text);}
+.mem-info{font-family:var(--mono);font-size:11px;color:var(--text2);text-align:center;margin-bottom:10px;line-height:1.5;}
+
 @media(max-width:600px){
   .banks,.ill-grid{grid-template-columns:1fr;}
   .lock-time{font-size:56px;}
@@ -555,6 +624,7 @@ body{
                 <div class="tr" style="grid-template-columns:1fr;"><div class="c hl">📌 Virement Reznik à reventiler avant audit de fin de mois (S22).</div></div>
                 <div class="tr" style="grid-template-columns:1fr;"><div class="c hl">📌 Kash S. — augmenter sa part sur opérations discrètes, fiable.</div></div>
                 <div class="tr" style="grid-template-columns:1fr;"><div class="c hl">📌 Ne jamais utiliser les lignes officielles pour le réseau occulte.</div></div>
+                <div class="tr" style="grid-template-columns:1fr;"><div class="c hl">📌 Séquence couleurs accès dossier masqué : <span style="color:#c41e3a;">ROUGE</span> → <span style="color:#d4a017;">JAUNE</span> → <span style="color:#1a3a6e;font-weight:700;">BLEU</span> → <span style="color:#2d5a3a;">VERT</span></div></div>
               </div>
 
               <div class="reveal-illegal-box" id="reveal-illegal">
@@ -570,9 +640,16 @@ body{
             </div>
 
             <!-- ILLEGAL -->
-            <div class="lsc-panel" id="lp-illegal">
+            <div class="lsc-panel scan-locked" id="lp-illegal">
               <div class="sec-head"><div class="sec-title" style="color:var(--purple);">Illégal</div><div class="sec-sub">// OPÉRATION FANTÔME — ULTRA-RESTREINT</div></div>
-              <div class="warn p"><div class="warn-i">☠</div><div>Véhicules volés, customisations illégales et réseau de recel dissimulés sous la couverture de LS Custom. Destruction immédiate en cas d'accès non autorisé.</div></div>
+              <div class="scan-banner" id="scan-banner">
+                <div class="scan-banner-i">🔍</div>
+                <div class="scan-banner-c">
+                  <div class="scan-banner-t" id="scan-banner-t">SCAN REQUIS — 8 VÉHICULES NON IDENTIFIÉS</div>
+                  <div class="scan-banner-d" id="scan-banner-d">Lance le scan pour identifier les véhicules dont les VIN doivent être retirés manuellement du système hors-ligne.</div>
+                </div>
+                <button class="scan-banner-btn" id="scan-btn" onclick="startMemoryGame(revealAllCars)">🔍 Lancer le scan</button>
+              </div>
               <div class="stats">
                 <div class="stat p"><div class="stat-l">Véhicules volés</div><div class="stat-v p">14</div></div>
                 <div class="stat p"><div class="stat-l">Customs illégales</div><div class="stat-v p">37</div></div>
@@ -581,41 +658,77 @@ body{
               </div>
               <div class="divider p">Véhicules volés en stock</div>
               <div class="ill-grid">
-                <div class="ill">
+                <div class="ill compromised">
                   <div class="ill-h"><div><div class="ill-n">Pegassi Zentorno</div><div class="ill-s">Supercar — 2023</div></div><div class="ill-p">8ZEN-049</div></div>
-                  <div class="ill-r"><div class="ill-k">VIN falsifié</div><div class="ill-v d">ZEN-001002-F ⚠</div></div>
+                  <div class="ill-r"><div class="ill-k">VIN falsifié</div><div style="display:flex;align-items:center;gap:8px;"><div class="ill-v d vin-target" data-car="zent">ZEN-001002-F ⚠</div><button class="vin-remove-btn" data-car="zent" onclick="removeVin('zent')">🗑 RETIRER</button></div></div>
                   <div class="ill-r"><div class="ill-k">Volé à</div><div class="ill-v">Rockford Hills</div></div>
                   <div class="ill-r"><div class="ill-k">Valeur</div><div class="ill-v m">$320 000</div></div>
                   <div class="ill-r"><div class="ill-k">Statut</div><div class="ill-v d">En repeinture</div></div>
                   <div class="ill-r"><div class="ill-k">Technicien</div><div class="ill-v p">Diego Sanshez</div></div>
                   <div class="tags"><span class="tag">Plaque falsifiée</span><span class="tag">GPS retiré</span><span class="tag">VIN regravé</span></div>
                 </div>
-                <div class="ill">
+                <div class="ill compromised">
                   <div class="ill-h"><div><div class="ill-n">Übermacht Sentinel RS</div><div class="ill-s">Berline — 2024</div></div><div class="ill-p">2SRS-771</div></div>
-                  <div class="ill-r"><div class="ill-k">VIN falsifié</div><div class="ill-v d">UBM-003317-F ⚠</div></div>
+                  <div class="ill-r"><div class="ill-k">VIN falsifié</div><div style="display:flex;align-items:center;gap:8px;"><div class="ill-v d vin-target" data-car="sent">UBM-003317-F ⚠</div><button class="vin-remove-btn" data-car="sent" onclick="removeVin('sent')">🗑 RETIRER</button></div></div>
                   <div class="ill-r"><div class="ill-k">Volé à</div><div class="ill-v">Vinewood</div></div>
                   <div class="ill-r"><div class="ill-k">Valeur</div><div class="ill-v m">$148 000</div></div>
                   <div class="ill-r"><div class="ill-k">Statut</div><div class="ill-v d">Attente acheteur</div></div>
                   <div class="ill-r"><div class="ill-k">Technicien</div><div class="ill-v p">Marlon Smith</div></div>
                   <div class="tags"><span class="tag">Plaque falsifiée</span><span class="tag">Boost illégal</span><span class="tag">Vitres pare-balles</span></div>
                 </div>
-                <div class="ill">
+                <div class="ill compromised">
                   <div class="ill-h"><div><div class="ill-n">Declasse Vigero ZX</div><div class="ill-s">Muscle — 2022</div></div><div class="ill-p">5VGZ-330</div></div>
-                  <div class="ill-r"><div class="ill-k">VIN falsifié</div><div class="ill-v d">DEC-009944-F ⚠</div></div>
+                  <div class="ill-r"><div class="ill-k">VIN falsifié</div><div style="display:flex;align-items:center;gap:8px;"><div class="ill-v d vin-target" data-car="vig">DEC-009944-F ⚠</div><button class="vin-remove-btn" data-car="vig" onclick="removeVin('vig')">🗑 RETIRER</button></div></div>
                   <div class="ill-r"><div class="ill-k">Volé à</div><div class="ill-v">Mirror Park</div></div>
                   <div class="ill-r"><div class="ill-k">Valeur</div><div class="ill-v m">$95 000</div></div>
                   <div class="ill-r"><div class="ill-k">Statut</div><div class="ill-v" style="color:var(--green)">Vendu — livré</div></div>
                   <div class="ill-r"><div class="ill-k">Technicien</div><div class="ill-v p">Kash Salvatore</div></div>
                   <div class="tags"><span class="tag">Compartiment caché</span><span class="tag">Nitro hors norme</span></div>
                 </div>
-                <div class="ill">
+                <div class="ill compromised">
                   <div class="ill-h"><div><div class="ill-n">Grotti Itali RSX</div><div class="ill-s">Supercar — 2024</div></div><div class="ill-p">9ITR-512</div></div>
-                  <div class="ill-r"><div class="ill-k">VIN falsifié</div><div class="ill-v d">GRT-007771-F ⚠</div></div>
+                  <div class="ill-r"><div class="ill-k">VIN falsifié</div><div style="display:flex;align-items:center;gap:8px;"><div class="ill-v d vin-target" data-car="ital">GRT-007771-F ⚠</div><button class="vin-remove-btn" data-car="ital" onclick="removeVin('ital')">🗑 RETIRER</button></div></div>
                   <div class="ill-r"><div class="ill-k">Volé à</div><div class="ill-v">Portola Drive</div></div>
                   <div class="ill-r"><div class="ill-k">Valeur</div><div class="ill-v m">$410 000</div></div>
                   <div class="ill-r"><div class="ill-k">Statut</div><div class="ill-v d">Non transformé</div></div>
                   <div class="ill-r"><div class="ill-k">Technicien</div><div class="ill-v p">Roy Koenigsegg</div></div>
                   <div class="tags"><span class="tag">En attente</span></div>
+                </div>
+                <div class="ill clean">
+                  <div class="ill-h"><div><div class="ill-n">Karin Sultan Classic</div><div class="ill-s">Berline — 2021</div></div><div class="ill-p">4KSC-188</div></div>
+                  <div class="ill-r"><div class="ill-k">VIN</div><div class="ill-v">KSC-2021-554210-A</div></div>
+                  <div class="ill-r"><div class="ill-k">Origine</div><div class="ill-v">Achat légitime (revente)</div></div>
+                  <div class="ill-r"><div class="ill-k">Valeur</div><div class="ill-v m">$78 000</div></div>
+                  <div class="ill-r"><div class="ill-k">Statut</div><div class="ill-v" style="color:var(--green)">Vitrine</div></div>
+                  <div class="ill-r"><div class="ill-k">Technicien</div><div class="ill-v p">Liza Devil</div></div>
+                  <div class="tags"><span class="tag" style="color:var(--green);background:rgba(61,220,132,0.08);border-color:rgba(61,220,132,0.2);">Papiers en règle</span></div>
+                </div>
+                <div class="ill clean">
+                  <div class="ill-h"><div><div class="ill-n">Annis Elegy Retro</div><div class="ill-s">Sport — 2020</div></div><div class="ill-p">7AER-552</div></div>
+                  <div class="ill-r"><div class="ill-k">VIN</div><div class="ill-v">AER-2020-118870-B</div></div>
+                  <div class="ill-r"><div class="ill-k">Origine</div><div class="ill-v">Customer build</div></div>
+                  <div class="ill-r"><div class="ill-k">Valeur</div><div class="ill-v m">$132 000</div></div>
+                  <div class="ill-r"><div class="ill-k">Statut</div><div class="ill-v" style="color:var(--green)">Livraison demain</div></div>
+                  <div class="ill-r"><div class="ill-k">Technicien</div><div class="ill-v p">Sophia Portmann</div></div>
+                  <div class="tags"><span class="tag" style="color:var(--green);background:rgba(61,220,132,0.08);border-color:rgba(61,220,132,0.2);">Papiers en règle</span></div>
+                </div>
+                <div class="ill clean">
+                  <div class="ill-h"><div><div class="ill-n">Vapid Comet Safari</div><div class="ill-s">Rallye — 2023</div></div><div class="ill-p">3VCS-907</div></div>
+                  <div class="ill-r"><div class="ill-k">VIN</div><div class="ill-v">VCS-2023-441290-C</div></div>
+                  <div class="ill-r"><div class="ill-k">Origine</div><div class="ill-v">Commande spéciale</div></div>
+                  <div class="ill-r"><div class="ill-k">Valeur</div><div class="ill-v m">$184 000</div></div>
+                  <div class="ill-r"><div class="ill-k">Statut</div><div class="ill-v" style="color:var(--green)">Terminé</div></div>
+                  <div class="ill-r"><div class="ill-k">Technicien</div><div class="ill-v p">Tao Ska</div></div>
+                  <div class="tags"><span class="tag" style="color:var(--green);background:rgba(61,220,132,0.08);border-color:rgba(61,220,132,0.2);">Papiers en règle</span></div>
+                </div>
+                <div class="ill clean">
+                  <div class="ill-h"><div><div class="ill-n">Dewbauchee Massacro</div><div class="ill-s">Supercar — 2024</div></div><div class="ill-p">6DMA-441</div></div>
+                  <div class="ill-r"><div class="ill-k">VIN</div><div class="ill-v">DMA-2024-998003-D</div></div>
+                  <div class="ill-r"><div class="ill-k">Origine</div><div class="ill-v">Achat occasion</div></div>
+                  <div class="ill-r"><div class="ill-k">Valeur</div><div class="ill-v m">$285 000</div></div>
+                  <div class="ill-r"><div class="ill-k">Statut</div><div class="ill-v" style="color:var(--green)">En tuning</div></div>
+                  <div class="ill-r"><div class="ill-k">Technicien</div><div class="ill-v p">Jack Mericine</div></div>
+                  <div class="tags"><span class="tag" style="color:var(--green);background:rgba(61,220,132,0.08);border-color:rgba(61,220,132,0.2);">Papiers en règle</span></div>
                 </div>
               </div>
               <div class="divider p">Clients du réseau occulte</div>
@@ -795,21 +908,34 @@ body{
     <div class="mg-box">
       <div class="mg-h"><div class="mg-t">⚡ Reconnecter les fils</div><button class="mg-x" onclick="cancelMG('wire')">✕</button></div>
       <div class="mg-i">// CIRCUIT DE SÉCURITÉ COUPÉ — Reconnecte chaque fil à la douille de la même couleur. Clique un fil, puis sa douille.</div>
+      <div class="mg-timer" id="wire-timer">⏱ 00:15</div>
       <div class="wire-game"><div class="wire-col" id="wire-left"></div><div class="wire-col" id="wire-right"></div></div>
       <div class="mg-s" id="wire-s">Sélectionne un fil...</div>
     </div>
   </div>
 
-  <!-- MINIGAME: PAINT -->
+  <!-- MINIGAME: PAINT SEQUENCE -->
   <div class="mg-overlay" id="paint-modal">
     <div class="mg-box">
-      <div class="mg-h"><div class="mg-t">🎨 Correspondance peinture</div><button class="mg-x" onclick="cancelMG('paint')">✕</button></div>
-      <div class="mg-i">// Identifie 5 teintes consécutives sans erreur pour déchiffrer le dossier masqué.</div>
-      <div class="paint-tg" id="paint-tg"></div>
-      <div class="paint-name" id="paint-name">—</div>
+      <div class="mg-h"><div class="mg-t">🎨 Séquence couleurs</div><button class="mg-x" onclick="cancelMG('paint')">✕</button></div>
+      <div class="mg-i">// Reproduis la séquence de 4 couleurs hors-livres dans l'ordre. La combinaison est consignée quelque part dans les dossiers de la direction.</div>
+      <div class="mg-timer" id="paint-timer">⏱ 00:15</div>
+      <div class="seq-slots" id="paint-slots">
+        <div class="seq-slot"></div><div class="seq-slot"></div><div class="seq-slot"></div><div class="seq-slot"></div>
+      </div>
       <div class="paint-grid" id="paint-grid"></div>
-      <div class="mg-s" id="paint-s">—</div>
-      <div class="mg-prog" id="paint-prog"><div class="mg-dot"></div><div class="mg-dot"></div><div class="mg-dot"></div><div class="mg-dot"></div><div class="mg-dot"></div></div>
+      <div class="mg-s" id="paint-s">Clique les 4 couleurs dans le bon ordre</div>
+    </div>
+  </div>
+
+  <!-- MINIGAME: MEMORY (reveal cars) -->
+  <div class="mg-overlay" id="mem-modal">
+    <div class="mg-box">
+      <div class="mg-h"><div class="mg-t">🔍 Scan de l'inventaire</div><button class="mg-x" onclick="cancelMG('mem')">✕</button></div>
+      <div class="mg-i">// Retrouve les 8 paires de symboles pour décoder l'inventaire et révéler chaque véhicule avec son statut VIN.</div>
+      <div class="mem-info" id="mem-info">Paires trouvées : 0 / 8</div>
+      <div class="mem-grid" id="mem-grid"></div>
+      <div class="mg-s" id="mem-s">Retourne 2 cartes à la fois</div>
     </div>
   </div>
 
@@ -1110,11 +1236,11 @@ function revealIllegal(){
   document.getElementById('tab-illegal').style.display='flex';
 }
 
-// ═══════ WIRE GAME ═══════
+// ═══════ WIRE GAME (45s timer) ═══════
 const WIRES=[{n:'ROUGE',c:'#ff5a5a'},{n:'BLEU',c:'#0a84ff'},{n:'VERT',c:'#3ddc84'},{n:'JAUNE',c:'#e8c94a'}];
-let wireSel=null,wireCb=null;
+let wireSel=null,wireCb=null,wireTimer=null,wireLeft=0;
 function startWireGame(cb){
-  wireCb=cb;wireSel=null;
+  wireCb=cb;wireSel=null;wireLeft=15;
   const L=document.getElementById('wire-left'),R=document.getElementById('wire-right');
   L.innerHTML='';R.innerHTML='';
   WIRES.forEach(w=>{
@@ -1125,6 +1251,20 @@ function startWireGame(cb){
   });
   document.getElementById('wire-s').textContent='Sélectionne un fil...';
   document.getElementById('wire-modal').classList.add('open');
+  updateWireTimer();
+  if(wireTimer)clearInterval(wireTimer);
+  wireTimer=setInterval(()=>{wireLeft--;updateWireTimer();if(wireLeft<=0)wireFail();},1000);
+}
+function updateWireTimer(){
+  const t=document.getElementById('wire-timer');
+  const m=Math.floor(wireLeft/60),s=wireLeft%60;
+  t.textContent='⏱ '+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  t.classList.toggle('warning',wireLeft<=10);
+}
+function wireFail(){
+  clearInterval(wireTimer);wireTimer=null;
+  document.getElementById('wire-s').textContent='✕ Temps écoulé — recommence';
+  setTimeout(()=>{document.getElementById('wire-modal').classList.remove('open');},1100);
 }
 function selWire(p){
   if(p.classList.contains('done'))return;
@@ -1134,37 +1274,135 @@ function selWire(p){
     wireSel.classList.remove('sel');wireSel.classList.add('done');p.classList.add('done');p.textContent='●';wireSel=null;
     const tot=document.querySelectorAll('#wire-left .wire-pin').length, done=document.querySelectorAll('#wire-left .done').length;
     document.getElementById('wire-s').textContent=`✓ ${done}/${tot}`;
-    if(done===tot){document.getElementById('wire-s').textContent='✓ Sécurité bypassée !';setTimeout(()=>{document.getElementById('wire-modal').classList.remove('open');if(wireCb)wireCb();},800);}
+    if(done===tot){clearInterval(wireTimer);wireTimer=null;document.getElementById('wire-s').textContent='✓ Sécurité bypassée !';setTimeout(()=>{document.getElementById('wire-modal').classList.remove('open');if(wireCb)wireCb();},800);}
   } else {
     const a=wireSel,b=p;a.classList.add('err');b.classList.add('err');document.getElementById('wire-s').textContent='✕ Mauvaise couleur';
     setTimeout(()=>{a.classList.remove('err','sel');b.classList.remove('err');wireSel=null;document.getElementById('wire-s').textContent='Sélectionne un fil...';},650);
   }
 }
 
-// ═══════ PAINT GAME ═══════
+// ═══════ PAINT SEQUENCE GAME (30s timer, answer hidden in Secret notes) ═══════
 const PAINTS=[{n:'Rouge Carmin',h:'#c41e3a'},{n:'Bleu Nuit',h:'#1a3a6e'},{n:'Vert Forêt',h:'#2d5a3a'},{n:'Jaune Or',h:'#d4a017'},{n:'Pourpre Royal',h:'#6a1b9a'},{n:'Orange Brûlé',h:'#cc4f1f'}];
-let pTarget=null,pProg=0,pCb=null,pBusy=false;
-function startPaintGame(cb){pProg=0;pCb=cb;pBusy=false;document.getElementById('paint-modal').classList.add('open');updatePProg();nextPaint();}
-function nextPaint(){
-  if(pProg>=5){document.getElementById('paint-s').textContent='✓ Dossier déchiffré !';setTimeout(()=>{document.getElementById('paint-modal').classList.remove('open');if(pCb)pCb();},800);return;}
-  pTarget=PAINTS[Math.floor(Math.random()*PAINTS.length)];
-  document.getElementById('paint-tg').style.background=pTarget.h;
-  document.getElementById('paint-name').textContent=pTarget.n;
+// Correct sequence : ROUGE → JAUNE → BLEU → VERT (clue in Secret tab)
+const PAINT_SEQ=['#c41e3a','#d4a017','#1a3a6e','#2d5a3a'];
+let pSeqIdx=0,pCb=null,pBusy=false,pTimer=null,pLeft=0;
+function startPaintGame(cb){
+  pSeqIdx=0;pCb=cb;pBusy=false;pLeft=15;
+  document.getElementById('paint-modal').classList.add('open');
+  renderPaintSlots();renderPaintGrid();
+  document.getElementById('paint-s').textContent='Reproduis la séquence dans le bon ordre';
+  updatePaintTimer();
+  if(pTimer)clearInterval(pTimer);
+  pTimer=setInterval(()=>{pLeft--;updatePaintTimer();if(pLeft<=0)paintFail();},1000);
+}
+function renderPaintSlots(){
+  const slots=document.querySelectorAll('#paint-slots .seq-slot');
+  slots.forEach((s,i)=>{
+    s.classList.remove('filled','flash-err');
+    if(i<pSeqIdx){s.style.background=PAINT_SEQ[i];s.style.color=PAINT_SEQ[i];s.classList.add('filled');s.style.borderColor=PAINT_SEQ[i];}
+    else{s.style.background='';s.style.color='';s.style.borderColor='';}
+  });
+}
+function renderPaintGrid(){
   const g=document.getElementById('paint-grid');g.innerHTML='';
   [...PAINTS].sort(()=>Math.random()-0.5).forEach(c=>{
     const b=document.createElement('button');b.className='paint-btn';b.style.background=c.h;
-    b.onclick=()=>{
-      if(pBusy)return;pBusy=true;
-      if(c.h===pTarget.h){pProg++;updatePProg();document.getElementById('paint-s').textContent=`✓ Match ! (${pProg}/5)`;setTimeout(()=>{pBusy=false;nextPaint();},320);}
-      else{document.getElementById('paint-s').textContent='✕ Mauvaise teinte';pProg=0;updatePProg();setTimeout(()=>{pBusy=false;nextPaint();},850);}
-    };
+    b.onclick=()=>paintClick(c.h);
     g.appendChild(b);
   });
-  document.getElementById('paint-s').textContent='Trouve la teinte cible';
 }
-function updatePProg(){document.querySelectorAll('#paint-prog .mg-dot').forEach((d,i)=>d.classList.toggle('on',i<pProg));}
+function paintClick(hex){
+  if(pBusy)return;
+  if(hex===PAINT_SEQ[pSeqIdx]){
+    pSeqIdx++;
+    renderPaintSlots();
+    document.getElementById('paint-s').textContent=`✓ ${pSeqIdx}/4`;
+    if(pSeqIdx>=4){
+      pBusy=true;clearInterval(pTimer);pTimer=null;
+      document.getElementById('paint-s').textContent='✓ Séquence validée !';
+      setTimeout(()=>{document.getElementById('paint-modal').classList.remove('open');if(pCb)pCb();},800);
+    }
+  } else {
+    pBusy=true;
+    document.querySelectorAll('#paint-slots .seq-slot').forEach(s=>s.classList.add('flash-err'));
+    document.getElementById('paint-s').textContent='✕ Mauvaise séquence — reset';
+    setTimeout(()=>{pSeqIdx=0;pBusy=false;renderPaintSlots();document.getElementById('paint-s').textContent='Reproduis la séquence dans le bon ordre';},800);
+  }
+}
+function updatePaintTimer(){
+  const t=document.getElementById('paint-timer');
+  const m=Math.floor(pLeft/60),s=pLeft%60;
+  t.textContent='⏱ '+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  t.classList.toggle('warning',pLeft<=10);
+}
+function paintFail(){
+  clearInterval(pTimer);pTimer=null;
+  document.getElementById('paint-s').textContent='✕ Temps écoulé — recommence';
+  setTimeout(()=>{document.getElementById('paint-modal').classList.remove('open');},1100);
+}
 
-function cancelMG(n){document.getElementById(n+'-modal').classList.remove('open');}
+function cancelMG(n){
+  document.getElementById(n+'-modal').classList.remove('open');
+  if(n==='wire'&&wireTimer){clearInterval(wireTimer);wireTimer=null;}
+  if(n==='paint'&&pTimer){clearInterval(pTimer);pTimer=null;}
+}
+
+// ═══════ ILLEGAL — REVEAL CARS via memory game ═══════
+let carsRevealed=false;
+function revealAllCars(){
+  carsRevealed=true;
+  document.getElementById('lp-illegal').classList.remove('scan-locked');
+  document.getElementById('scan-banner').classList.add('done');
+  document.getElementById('scan-banner-t').textContent='✓ SCAN TERMINÉ — STATUT VIN AFFICHÉ';
+  document.getElementById('scan-banner-d').textContent='Bandeau rouge = VIN à retirer manuellement hors du système. Bandeau vert = VIN valide à conserver.';
+  document.getElementById('scan-btn').disabled=true;
+  document.getElementById('scan-btn').textContent='✓ Scanné';
+}
+
+// ═══════ MEMORY GAME ═══════
+const MEM_SYMBOLS=['🚗','🔧','⚙️','🛠','🔩','⚡','🎨','💎'];
+let memCards=[],memFlipped=[],memMatched=0,memBusy=false,memCb=null;
+function startMemoryGame(cb){
+  memCb=cb;memMatched=0;memBusy=false;memFlipped=[];
+  // Build 16 cards (each symbol x2), shuffled
+  memCards=[...MEM_SYMBOLS,...MEM_SYMBOLS].sort(()=>Math.random()-0.5);
+  const g=document.getElementById('mem-grid');g.innerHTML='';
+  memCards.forEach((sym,i)=>{
+    const c=document.createElement('div');c.className='mem-card';c.dataset.i=i;c.dataset.s=sym;c.textContent='?';
+    c.onclick=()=>memClick(c);g.appendChild(c);
+  });
+  document.getElementById('mem-info').textContent='Paires trouvées : 0 / 8';
+  document.getElementById('mem-s').textContent='Retourne 2 cartes à la fois';
+  document.getElementById('mem-modal').classList.add('open');
+}
+function memClick(c){
+  if(memBusy)return;
+  if(c.classList.contains('flip')||c.classList.contains('match'))return;
+  c.classList.add('flip');c.textContent=c.dataset.s;
+  memFlipped.push(c);
+  if(memFlipped.length===2){
+    memBusy=true;
+    const [a,b]=memFlipped;
+    if(a.dataset.s===b.dataset.s){
+      setTimeout(()=>{
+        a.classList.remove('flip');b.classList.remove('flip');
+        a.classList.add('match');b.classList.add('match');
+        memMatched++;memFlipped=[];memBusy=false;
+        document.getElementById('mem-info').textContent=`Paires trouvées : ${memMatched} / 8`;
+        if(memMatched===8){
+          document.getElementById('mem-s').textContent='✓ Inventaire décodé !';
+          setTimeout(()=>{document.getElementById('mem-modal').classList.remove('open');if(memCb)memCb();},900);
+        }
+      },350);
+    } else {
+      setTimeout(()=>{
+        a.classList.remove('flip');b.classList.remove('flip');
+        a.textContent='?';b.textContent='?';
+        memFlipped=[];memBusy=false;
+      },800);
+    }
+  }
+}
 
 // ═══════ TERMINAL ═══════
 const termOut=document.getElementById('term-out');
@@ -1179,6 +1417,7 @@ function termBoot(){
 function skipAllMinigames(){
   unlockSecret();
   revealIllegal();
+  revealAllCars();
 }
 function termRun(raw){
   const cmd=raw.trim();
